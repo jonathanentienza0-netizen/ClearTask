@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureLogin - Authentication</title>
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <main class="auth-container">
+
+        <!-- LEFT SIDE -->
+        <section class="welcome-section">
+
+            <div class="welcome-content">
+
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+
+                    <span>ClearTask</span>
+                </div>
+
+                <div class="welcome-text">
+                    <h1>Welcome Back!</h1>
+
+                    <p>
+                        Sign in to your account and continue
+                        where you left off.
+                    </p>
+                </div>
+
+                <div class="features">
+
+                    <div class="feature">
+                        <i class="fa-solid fa-lock"></i>
+                        <div>
+                            <strong>Secure Access</strong>
+                            <span>Simple and protected login experience.</span>
+                        </div>
+                    </div>
+
+                    <div class="feature">
+                        <i class="fa-solid fa-bolt"></i>
+                        <div>
+                            <strong>Fast & Easy</strong>
+                            <span>Quick access to your dashboard.</span>
+                        </div>
+                    </div>
+
+                    <div class="feature">
+                        <i class="fa-solid fa-mobile-screen"></i>
+                        <div>
+                            <strong>Responsive</strong>
+                            <span>Works on desktop, tablet and mobile.</span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- RIGHT SIDE -->
+        <section class="form-section">
+
+            <div class="form-wrapper">
+
+                <!-- ================= LOGIN ================= -->
+
+                <div id="loginPage" class="page active">
+
+                    <div class="form-header">
+                        <h2>Sign In</h2>
+
+                        <p>
+                            Enter your account details below.
+                        </p>
+                    </div>
+
+                    <form id="loginForm">
+
+                        <!-- Username / Email -->
+                        <div class="input-group">
+
+                            <label for="loginIdentifier">
+                                Email or Username
+                            </label>
+
+                            <div class="input-box">
+
+                                <i class="fa-regular fa-user"></i>
+
+                                <input
+                                    type="text"
+                                    id="loginIdentifier"
+                                    placeholder="Enter email or username"
+                                    autocomplete="username"
+                                    required
+                                >
+
+                            </div>
+
+                            <small class="error-message"
+                                   id="loginIdentifierError"></small>
+
+                        </div>
+
+
+                        <!-- Password -->
+                        <div class="input-group">
+
+                            <label for="loginPassword">
+                                Password
+                            </label>
+
+                            <div class="input-box">
+
+                                <i class="fa-solid fa-lock"></i>
+
+                                <input
+                                    type="password"
+                                    id="loginPassword"
+                                    placeholder="Enter password"
+                                    autocomplete="current-password"
+                                    required
+                                >
+
+                                <button
+                                    type="button"
+                                    class="password-toggle"
+                                    onclick="togglePassword('loginPassword', this)"
+                                    aria-label="Show password"
+                                >
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+
+                            </div>
+
+                            <small class="error-message"
+                                   id="loginPasswordError"></small>
+
+                        </div>
+
+
+                        <!-- Remember / Forgot -->
+                        <div class="form-options">
+
+                            <label class="remember">
+
+                                <input
+                                    type="checkbox"
+                                    id="rememberMe"
+                                >
+
+                                <span class="checkmark"></span>
+
+                                Remember me
+
+                            </label>
+
+                            <button
+                                type="button"
+                                class="link-button"
+                                onclick="showPage('forgotPage')"
+                            >
+                                Forgot Password?
+                            </button>
+
+                        </div>
+
+
+                        <!-- Message -->
+                        <div id="loginMessage"
+                             class="message">
+                        </div>
+
+
+                        <!-- Login -->
+                        <button
+                            type="submit"
+                            class="primary-button"
+                            id="loginButton"
+                        >
+                            <span>Sign In</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+
+                    </form>
+
+
+                    <div class="demo-info">
+
+                        <strong>Demo Account</strong>
+
+                        <p>
+                            Username: <b>demo</b>
+                        </p>
+
+                        <p>
+                            Email: <b>demo@example.com</b>
+                        </p>
+
+                        <p>
+                            Password: <b>Password123!</b>
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ================= FORGOT PASSWORD ================= -->
+
+                <div id="forgotPage" class="page">
+
+                    <button
+                        class="back-button"
+                        onclick="showPage('loginPage')"
+                    >
+                        <i class="fa-solid fa-arrow-left"></i>
+                        Back to Login
+                    </button>
+
+                    <div class="page-icon">
+                        <i class="fa-solid fa-key"></i>
+                    </div>
+
+                    <div class="form-header">
+
+                        <h2>Forgot Password?</h2>
+
+                        <p>
+                            Enter your email address and we'll
+                            help you reset your password.
+                        </p>
+
+                    </div>
+
+
+                    <form id="forgotForm">
+
+                        <div class="input-group">
+
+                            <label for="forgotEmail">
+                                Email Address
+                            </label>
+
+                            <div class="input-box">
+
+                                <i class="fa-regular fa-envelope"></i>
+
+                                <input
+                                    type="email"
+                                    id="forgotEmail"
+                                    placeholder="Enter your email"
+                                    required
+                                >
+
+                            </div>
+
+                            <small
+                                class="error-message"
+                                id="forgotEmailError">
+                            </small>
+
+                        </div>
+
+
+                        <div id="forgotMessage"
+                             class="message">
+                        </div>
+
+
+                        <button
+                            type="submit"
+                            class="primary-button"
+                            id="forgotButton"
+                        >
+                            <span>Send Reset Link</span>
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+
+                    </form>
+
+                </div>
+
+
+                <!-- ================= RESET PASSWORD ================= -->
+
+                <div id="resetPage" class="page">
+
+                    <button
+                        class="back-button"
+                        onclick="showPage('loginPage')"
+                    >
+                        <i class="fa-solid fa-arrow-left"></i>
+                        Back to Login
+                    </button>
+
+                    <div class="page-icon">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+
+                    <div class="form-header">
+
+                        <h2>Reset Password</h2>
+
+                        <p>
+                            Create a new password for your account.
+                        </p>
+
+                    </div>
+
+
+                    <form id="resetForm">
+
+                        <!-- New password -->
+                        <div class="input-group">
+
+                            <label for="newPassword">
+                                New Password
+                            </label>
+
+                            <div class="input-box">
+
+                                <i class="fa-solid fa-lock"></i>
+
+                                <input
+                                    type="password"
+                                    id="newPassword"
+                                    placeholder="Enter new password"
+                                    required
+                                >
+
+                                <button
+                                    type="button"
+                                    class="password-toggle"
+                                    onclick="togglePassword('newPassword', this)"
+                                >
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Password strength -->
+                        <div class="password-strength">
+
+                            <div class="strength-label">
+                                <span>Password strength</span>
+                                <strong id="strengthText">
+                                    —
+                                </strong>
+                            </div>
+
+                            <div class="strength-bar">
+                                <div id="strengthProgress"></div>
+                            </div>
+
+                        </div>
+
+
+                        <!-- Requirements -->
+                        <div class="password-requirements">
+
+                            <p id="lengthRequirement">
+                                <i class="fa-solid fa-circle"></i>
+                                At least 8 characters
+                            </p>
+
+                            <p id="uppercaseRequirement">
+                                <i class="fa-solid fa-circle"></i>
+                                One uppercase letter
+                            </p>
+
+                            <p id="lowercaseRequirement">
+                                <i class="fa-solid fa-circle"></i>
+                                One lowercase letter
+                            </p>
+
+                            <p id="numberRequirement">
+                                <i class="fa-solid fa-circle"></i>
+                                One number
+                            </p>
+
+                            <p id="specialRequirement">
+                                <i class="fa-solid fa-circle"></i>
+                                One special character
+                            </p>
+
+                        </div>
+
+
+                        <!-- Confirm password -->
+                        <div class="input-group">
+
+                            <label for="confirmPassword">
+                                Confirm Password
+                            </label>
+
+                            <div class="input-box">
+
+                                <i class="fa-solid fa-lock"></i>
+
+                                <input
+                                    type="password"
+                                    id="confirmPassword"
+                                    placeholder="Confirm your password"
+                                    required
+                                >
+
+                                <button
+                                    type="button"
+                                    class="password-toggle"
+                                    onclick="togglePassword('confirmPassword', this)"
+                                >
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+
+                            </div>
+
+                            <small
+                                class="error-message"
+                                id="confirmPasswordError">
+                            </small>
+
+                        </div>
+
+
+                        <div id="resetMessage"
+                             class="message">
+                        </div>
+
+
+                        <button
+                            type="submit"
+                            class="primary-button"
+                            id="resetButton"
+                        >
+                            <span>Reset Password</span>
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+
+                    </form>
+
+                </div>
+
+
+                <!-- ================= SUCCESS ================= -->
+
+                <div id="successPage" class="page success-page">
+
+                    <div class="success-icon">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+
+                    <h2>Password Reset Successfully!</h2>
+
+                    <p>
+                        Your password has been successfully changed.
+                        You can now log in using your new password.
+                    </p>
+
+                    <button
+                        class="primary-button"
+                        onclick="showPage('loginPage')"
+                    >
+                        <span>Back to Login</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+
+                </div>
+
+
+                <!-- ================= DASHBOARD ================= -->
+
+                <div id="dashboardPage" class="page dashboard-page">
+
+                    <div class="dashboard-icon">
+                        <i class="fa-solid fa-user-check"></i>
+                    </div>
+
+                    <h2>Welcome!</h2>
+
+                    <p>
+                        You have successfully logged in.
+                    </p>
+
+                    <div class="user-card">
+
+                        <div class="user-avatar">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+
+                        <div>
+                            <span>Logged in as</span>
+                            <strong id="dashboardUser">
+                                Demo User
+                            </strong>
+                        </div>
+
+                    </div>
+
+                    <button
+                        class="logout-button"
+                        onclick="logout()"
+                    >
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        Logout
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script src="script.js"></script>
+
+</body>
+</html>
