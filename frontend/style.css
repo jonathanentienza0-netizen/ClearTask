@@ -595,7 +595,7 @@ body {
     overflow: hidden;
 }
 
-#strengthProgress {
+.strength-bar > div {
     height: 100%;
 
     width: 0%;
@@ -846,4 +846,46 @@ body {
         text-align: right;
     }
 
+}
+
+
+/* ================= SWITCH LINK (Login <-> Create Account) ================= */
+
+.switch-text {
+    margin-top: 22px;
+
+    text-align: center;
+
+    font-size: 13px;
+
+    color: var(--muted);
+}
+
+.switch-text .link-button {
+    margin-left: 4px;
+}
+
+
+/* ================= TERMS ================= */
+
+.terms-group {
+    margin-bottom: 20px;
+}
+
+.terms-group .remember {
+    align-items: flex-start;
+
+    line-height: 1.5;
+}
+
+.terms-group .remember input {
+    flex-shrink: 0;
+
+    margin-top: 2px;
+}
+
+.terms-group .remember strong {
+    color: var(--primary);
+
+    font-weight: 600;
 }

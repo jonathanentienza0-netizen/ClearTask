@@ -204,6 +204,18 @@
                     </form>
 
 
+                    <p class="switch-text">
+                        Don't have an account?
+                        <button
+                            type="button"
+                            class="link-button"
+                            onclick="showPage('registerPage')"
+                        >
+                            Create account
+                        </button>
+                    </p>
+
+
                     <div class="demo-info">
 
                         <strong>Demo Account</strong>
@@ -221,6 +233,284 @@
                         </p>
 
                     </div>
+
+                </div>
+
+
+                <!-- ================= CREATE ACCOUNT ================= -->
+
+                <div id="registerPage" class="page">
+
+                    <button
+                        class="back-button"
+                        onclick="showPage('loginPage')"
+                    >
+                        <i class="fa-solid fa-arrow-left"></i>
+                        Back to Login
+                    </button>
+
+                    <div class="page-icon">
+                        <i class="fa-solid fa-user-plus"></i>
+                    </div>
+
+                    <div class="form-header">
+
+                        <h2>Create Account</h2>
+
+                        <p>
+                            Fill in your details to get started.
+                        </p>
+
+                    </div>
+
+
+                    <form id="registerForm" novalidate>
+
+                        <!-- Full name -->
+                        <div class="input-group">
+
+                            <label for="registerName">
+                                Full Name
+                            </label>
+
+                            <div class="input-box">
+
+                                <i class="fa-regular fa-user"></i>
+
+                                <input
+                                    type="text"
+                                    id="registerName"
+                                    placeholder="Enter your full name"
+                                    autocomplete="name"
+                                >
+
+                            </div>
+
+                            <small class="error-message"
+                                   id="registerNameError"></small>
+
+                        </div>
+
+
+                        <!-- Username -->
+                        <div class="input-group">
+
+                            <label for="registerUsername">
+                                Username
+                            </label>
+
+                            <div class="input-box">
+
+                                <i class="fa-solid fa-at"></i>
+
+                                <input
+                                    type="text"
+                                    id="registerUsername"
+                                    placeholder="Choose a username"
+                                    autocomplete="username"
+                                >
+
+                            </div>
+
+                            <small class="error-message"
+                                   id="registerUsernameError"></small>
+
+                        </div>
+
+
+                        <!-- Email -->
+                        <div class="input-group">
+
+                            <label for="registerEmail">
+                                Email Address
+                            </label>
+
+                            <div class="input-box">
+
+                                <i class="fa-regular fa-envelope"></i>
+
+                                <input
+                                    type="email"
+                                    id="registerEmail"
+                                    placeholder="Enter your email"
+                                    autocomplete="email"
+                                >
+
+                            </div>
+
+                            <small class="error-message"
+                                   id="registerEmailError"></small>
+
+                        </div>
+
+
+                        <!-- Password -->
+                        <div class="input-group">
+
+                            <label for="registerPassword">
+                                Password
+                            </label>
+
+                            <div class="input-box">
+
+                                <i class="fa-solid fa-lock"></i>
+
+                                <input
+                                    type="password"
+                                    id="registerPassword"
+                                    placeholder="Create a password"
+                                    autocomplete="new-password"
+                                >
+
+                                <button
+                                    type="button"
+                                    class="password-toggle"
+                                    onclick="togglePassword('registerPassword', this)"
+                                    aria-label="Show password"
+                                >
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Password strength -->
+                        <div class="password-strength">
+
+                            <div class="strength-label">
+                                <span>Password strength</span>
+                                <strong id="registerStrengthText">
+                                    —
+                                </strong>
+                            </div>
+
+                            <div class="strength-bar">
+                                <div id="registerStrengthProgress"></div>
+                            </div>
+
+                        </div>
+
+
+                        <!-- Requirements -->
+                        <div class="password-requirements">
+
+                            <p id="registerLengthRequirement">
+                                <i class="fa-solid fa-circle"></i>
+                                At least 8 characters
+                            </p>
+
+                            <p id="registerUppercaseRequirement">
+                                <i class="fa-solid fa-circle"></i>
+                                One uppercase letter
+                            </p>
+
+                            <p id="registerLowercaseRequirement">
+                                <i class="fa-solid fa-circle"></i>
+                                One lowercase letter
+                            </p>
+
+                            <p id="registerNumberRequirement">
+                                <i class="fa-solid fa-circle"></i>
+                                One number
+                            </p>
+
+                            <p id="registerSpecialRequirement">
+                                <i class="fa-solid fa-circle"></i>
+                                One special character
+                            </p>
+
+                        </div>
+
+
+                        <!-- Confirm password -->
+                        <div class="input-group">
+
+                            <label for="registerConfirmPassword">
+                                Confirm Password
+                            </label>
+
+                            <div class="input-box">
+
+                                <i class="fa-solid fa-lock"></i>
+
+                                <input
+                                    type="password"
+                                    id="registerConfirmPassword"
+                                    placeholder="Confirm your password"
+                                    autocomplete="new-password"
+                                >
+
+                                <button
+                                    type="button"
+                                    class="password-toggle"
+                                    onclick="togglePassword('registerConfirmPassword', this)"
+                                    aria-label="Show password"
+                                >
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+
+                            </div>
+
+                            <small class="error-message"
+                                   id="registerConfirmError"></small>
+
+                        </div>
+
+
+                        <!-- Terms -->
+                        <div class="terms-group">
+
+                            <label class="remember">
+
+                                <input
+                                    type="checkbox"
+                                    id="registerTerms"
+                                >
+
+                                <span>
+                                    I agree to the
+                                    <strong>Terms of Service</strong>
+                                    and
+                                    <strong>Privacy Policy</strong>
+                                </span>
+
+                            </label>
+
+                            <small class="error-message"
+                                   id="registerTermsError"></small>
+
+                        </div>
+
+
+                        <div id="registerMessage"
+                             class="message">
+                        </div>
+
+
+                        <button
+                            type="submit"
+                            class="primary-button"
+                            id="registerButton"
+                        >
+                            <span>Create Account</span>
+                            <i class="fa-solid fa-user-plus"></i>
+                        </button>
+
+                    </form>
+
+
+                    <p class="switch-text">
+                        Already have an account?
+                        <button
+                            type="button"
+                            class="link-button"
+                            onclick="showPage('loginPage')"
+                        >
+                            Sign in
+                        </button>
+                    </p>
 
                 </div>
 

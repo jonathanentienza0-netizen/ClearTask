@@ -15,9 +15,147 @@ function getPassword() {
 }
 
 
+/* Accounts (frontend demo only) */
+
+function getUsers() {
+
+    try {
+
+        return JSON.parse(
+            localStorage.getItem("demoUsers")
+        ) || [];
+
+    } catch (error) {
+
+        return [];
+
+    }
+
+}
+
+
+function saveUsers(users) {
+
+    localStorage.setItem(
+        "demoUsers",
+        JSON.stringify(users)
+    );
+
+}
+
+
+/* Find demo account or a registered account */
+
+function findAccount(identifier) {
+
+    const id = identifier.toLowerCase();
+
+    if (
+        id === DEFAULT_ACCOUNT.username.toLowerCase() ||
+        id === DEFAULT_ACCOUNT.email.toLowerCase()
+    ) {
+
+        return {
+            name: DEFAULT_ACCOUNT.name,
+            username: DEFAULT_ACCOUNT.username,
+            email: DEFAULT_ACCOUNT.email,
+            password: getPassword()
+        };
+
+    }
+
+    return getUsers().find(function(user) {
+
+        return user.username.toLowerCase() === id
+            || user.email.toLowerCase() === id;
+
+    }) || null;
+
+}
+
+
+function isUsernameTaken(username) {
+
+    return findAccount(username) !== null;
+
+}
+
+
+function isEmailTaken(email) {
+
+    return findAccount(email) !== null;
+
+}
+
+
+/* Save a new password for the account that owns this email */
+
+function applyNewPassword(email, newPassword) {
+
+    const users = getUsers();
+
+    const index = users.findIndex(function(user) {
+
+        return email &&
+            user.email.toLowerCase() === email.toLowerCase();
+
+    });
+
+    if (index !== -1) {
+
+        users[index].password = newPassword;
+
+        saveUsers(users);
+
+    } else {
+
+        localStorage.setItem(
+            "demoPassword",
+            newPassword
+        );
+
+    }
+
+}
+
+
+/* Left panel text changes per page */
+
+function updateWelcomePanel(pageId) {
+
+    const title =
+        document.querySelector(".welcome-text h1");
+
+    const text =
+        document.querySelector(".welcome-text p");
+
+    if (!title || !text) return;
+
+    if (pageId === "registerPage") {
+
+        title.textContent = "Join ClearTask";
+
+        text.textContent =
+            "Create your account in less than a minute and get started right away.";
+
+    } else {
+
+        title.textContent = "Welcome Back!";
+
+        text.textContent =
+            "Sign in to your account and continue where you left off.";
+
+    }
+
+}
+
+
 /* Page NaviGAYtion */
 
 function showPage(pageId) {
+
+    updateWelcomePanel(pageId);
+
 
     const pages = document.querySelectorAll(".page");
 
@@ -195,24 +333,10 @@ document
 
         setTimeout(function() {
 
-            const currentPassword = getPassword();
+            const account = findAccount(identifier);
 
 
-            const validIdentifier =
-                identifier.toLowerCase() ===
-                DEFAULT_ACCOUNT.username.toLowerCase()
-
-                ||
-
-                identifier.toLowerCase() ===
-                DEFAULT_ACCOUNT.email.toLowerCase();
-
-
-            const validPassword =
-                password === currentPassword;
-
-
-            if (validIdentifier && validPassword) {
+            if (account && password === account.password) {
 
                 /* Remember Me */
 
@@ -242,7 +366,7 @@ document
 
                 sessionStorage.setItem(
                     "loggedUser",
-                    DEFAULT_ACCOUNT.name
+                    account.name
                 );
 
 
@@ -250,7 +374,7 @@ document
 
                 document.getElementById(
                     "dashboardUser"
-                ).textContent = identifier;
+                ).textContent = account.name;
 
 
                 showPage("dashboardPage");
@@ -393,107 +517,121 @@ document
 
 /* kalakasan ng password */
 
+const RESET_UI = {
+    progress: "strengthProgress",
+    text: "strengthText",
+    requirements: {
+        length: "lengthRequirement",
+        uppercase: "uppercaseRequirement",
+        lowercase: "lowercaseRequirement",
+        number: "numberRequirement",
+        special: "specialRequirement"
+    }
+};
+
+const REGISTER_UI = {
+    progress: "registerStrengthProgress",
+    text: "registerStrengthText",
+    requirements: {
+        length: "registerLengthRequirement",
+        uppercase: "registerUppercaseRequirement",
+        lowercase: "registerLowercaseRequirement",
+        number: "registerNumberRequirement",
+        special: "registerSpecialRequirement"
+    }
+};
+
+
+function checkPassword(password) {
+
+    const checks = {
+        length: password.length >= 8,
+        uppercase: /[A-Z]/.test(password),
+        lowercase: /[a-z]/.test(password),
+        number: /[0-9]/.test(password),
+        special: /[^A-Za-z0-9]/.test(password)
+    };
+
+    const score =
+        Object.values(checks).filter(Boolean).length;
+
+    return {
+        checks: checks,
+        score: score,
+        valid: score === 5
+    };
+
+}
+
+
+function renderPasswordStrength(password, ui) {
+
+    const result = checkPassword(password);
+
+
+    /* Update requirements */
+
+    Object.keys(ui.requirements).forEach(function(key) {
+
+        updateRequirement(
+            ui.requirements[key],
+            result.checks[key]
+        );
+
+    });
+
+
+    /* Update strength bar */
+
+    const progress =
+        document.getElementById(ui.progress);
+
+    const strengthText =
+        document.getElementById(ui.text);
+
+
+    if (!password) {
+
+        progress.style.width = "0%";
+
+        progress.style.background = "#d1d5db";
+
+        strengthText.textContent = "—";
+
+    } else if (result.score <= 2) {
+
+        progress.style.width = "35%";
+
+        progress.style.background = "#ef4444";
+
+        strengthText.textContent = "Weak";
+
+    } else if (result.score <= 4) {
+
+        progress.style.width = "70%";
+
+        progress.style.background = "#f59e0b";
+
+        strengthText.textContent = "Medium";
+
+    } else {
+
+        progress.style.width = "100%";
+
+        progress.style.background = "#16a34a";
+
+        strengthText.textContent = "Strong";
+
+    }
+
+}
+
+
 document
     .getElementById("newPassword")
     .addEventListener("input", function() {
 
-        const password = this.value;
-
-
-        const hasLength =
-            password.length >= 8;
-
-        const hasUppercase =
-            /[A-Z]/.test(password);
-
-        const hasLowercase =
-            /[a-z]/.test(password);
-
-        const hasNumber =
-            /[0-9]/.test(password);
-
-        const hasSpecial =
-            /[^A-Za-z0-9]/.test(password);
-
-
-        /* Update requirements */
-
-        updateRequirement(
-            "lengthRequirement",
-            hasLength
-        );
-
-        updateRequirement(
-            "uppercaseRequirement",
-            hasUppercase
-        );
-
-        updateRequirement(
-            "lowercaseRequirement",
-            hasLowercase
-        );
-
-        updateRequirement(
-            "numberRequirement",
-            hasNumber
-        );
-
-        updateRequirement(
-            "specialRequirement",
-            hasSpecial
-        );
-
-
-        /* Calculate strength */
-
-        let score = 0;
-
-        if (hasLength) score++;
-        if (hasUppercase) score++;
-        if (hasLowercase) score++;
-        if (hasNumber) score++;
-        if (hasSpecial) score++;
-
-
-        const progress =
-            document.getElementById(
-                "strengthProgress"
-            );
-
-        const strengthText =
-            document.getElementById(
-                "strengthText"
-            );
-
-
-        if (!password) {
-
-            progress.style.width = "0%";
-
-            strengthText.textContent = "—";
-
-        } else if (score <= 2) {
-
-            progress.style.width = "35%";
-
-            strengthText.textContent =
-                "Weak";
-
-        } else if (score <= 4) {
-
-            progress.style.width = "70%";
-
-            strengthText.textContent =
-                "Medium";
-
-        } else {
-
-            progress.style.width = "100%";
-
-            strengthText.textContent =
-                "Strong";
-
-        }
+        renderPasswordStrength(this.value, RESET_UI);
 
     });
 
@@ -611,8 +749,8 @@ document
                 Never store real passwords this way.
             */
 
-            localStorage.setItem(
-                "demoPassword",
+            applyNewPassword(
+                sessionStorage.getItem("resetEmail"),
                 newPassword
             );
 
@@ -630,6 +768,289 @@ document
 
 
             showPage("successPage");
+
+
+        }, 900);
+
+    });
+
+
+/* ================= CREATE ACCOUNT ================= */
+
+function setFieldError(elementId, message) {
+
+    document.getElementById(elementId).textContent = message;
+
+}
+
+
+function resetRegisterForm() {
+
+    document.getElementById("registerForm").reset();
+
+    renderPasswordStrength("", REGISTER_UI);
+
+    ["registerPassword", "registerConfirmPassword"]
+        .forEach(function(inputId) {
+
+            const input = document.getElementById(inputId);
+
+            input.type = "password";
+
+            input
+                .parentElement
+                .querySelector(".password-toggle i")
+                .className = "fa-regular fa-eye";
+
+        });
+
+}
+
+
+document
+    .getElementById("registerPassword")
+    .addEventListener("input", function() {
+
+        renderPasswordStrength(this.value, REGISTER_UI);
+
+    });
+
+
+document
+    .getElementById("registerForm")
+    .addEventListener("submit", function(event) {
+
+        event.preventDefault();
+
+
+        const name =
+            document
+                .getElementById("registerName")
+                .value
+                .trim();
+
+        const username =
+            document
+                .getElementById("registerUsername")
+                .value
+                .trim();
+
+        const email =
+            document
+                .getElementById("registerEmail")
+                .value
+                .trim();
+
+        const password =
+            document
+                .getElementById("registerPassword")
+                .value;
+
+        const confirmPassword =
+            document
+                .getElementById("registerConfirmPassword")
+                .value;
+
+        const termsAccepted =
+            document
+                .getElementById("registerTerms")
+                .checked;
+
+
+        /* Clear old errors */
+
+        [
+            "registerNameError",
+            "registerUsernameError",
+            "registerEmailError",
+            "registerConfirmError",
+            "registerTermsError"
+        ].forEach(function(id) {
+
+            setFieldError(id, "");
+
+        });
+
+        const message =
+            document.getElementById("registerMessage");
+
+        message.textContent = "";
+
+        message.className = "message";
+
+
+        /* Validation */
+
+        let valid = true;
+
+
+        if (name.length < 2) {
+
+            setFieldError(
+                "registerNameError",
+                "Please enter your full name."
+            );
+
+            valid = false;
+
+        }
+
+
+        if (!/^[A-Za-z0-9_.]{3,20}$/.test(username)) {
+
+            setFieldError(
+                "registerUsernameError",
+                "Use 3-20 letters, numbers, underscores or dots."
+            );
+
+            valid = false;
+
+        } else if (isUsernameTaken(username)) {
+
+            setFieldError(
+                "registerUsernameError",
+                "That username is already taken."
+            );
+
+            valid = false;
+
+        }
+
+
+        const emailPattern =
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!email) {
+
+            setFieldError(
+                "registerEmailError",
+                "Please enter your email address."
+            );
+
+            valid = false;
+
+        } else if (!emailPattern.test(email)) {
+
+            setFieldError(
+                "registerEmailError",
+                "Please enter a valid email address."
+            );
+
+            valid = false;
+
+        } else if (isEmailTaken(email)) {
+
+            setFieldError(
+                "registerEmailError",
+                "An account with this email already exists."
+            );
+
+            valid = false;
+
+        }
+
+
+        if (!checkPassword(password).valid) {
+
+            showMessage(
+                "registerMessage",
+                "Please meet all password requirements.",
+                "error"
+            );
+
+            valid = false;
+
+        }
+
+
+        if (password !== confirmPassword) {
+
+            setFieldError(
+                "registerConfirmError",
+                "Passwords do not match."
+            );
+
+            valid = false;
+
+        }
+
+
+        if (!termsAccepted) {
+
+            setFieldError(
+                "registerTermsError",
+                "You must accept the terms to continue."
+            );
+
+            valid = false;
+
+        }
+
+
+        if (!valid) return;
+
+
+        /* Loading */
+
+        const button =
+            document.getElementById("registerButton");
+
+        button.classList.add("loading");
+
+        button.innerHTML =
+            `<span>Creating account...</span>
+             <i class="fa-solid fa-spinner fa-spin"></i>`;
+
+
+        setTimeout(function() {
+
+            /*
+                Save new account.
+
+                NOTE:
+                This is only for a frontend demo.
+                Never store real passwords this way.
+            */
+
+            const users = getUsers();
+
+            users.push({
+                name: name,
+                username: username,
+                email: email,
+                password: password
+            });
+
+            saveUsers(users);
+
+
+            button.classList.remove("loading");
+
+            button.innerHTML =
+                `<span>Create Account</span>
+                 <i class="fa-solid fa-user-plus"></i>`;
+
+
+            resetRegisterForm();
+
+
+            /* Send the user to login with their username filled in */
+
+            showPage("loginPage");
+
+            document.getElementById(
+                "loginIdentifier"
+            ).value = username;
+
+            document.getElementById(
+                "loginPassword"
+            ).value = "";
+
+            showMessage(
+                "loginMessage",
+                "Account created successfully! You can now sign in.",
+                "success"
+            );
 
 
         }, 900);
