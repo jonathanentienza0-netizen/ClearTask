@@ -780,50 +780,155 @@
                 </div>
 
 
-                <!-- ================= DASHBOARD ================= -->
+<!-- ================= DASHBOARD ================= -->
 
-                <div id="dashboardPage" class="page dashboard-page">
+<div id="dashboardView" class="dashboard-view">
 
-                    <div class="dashboard-icon">
-                        <i class="fa-solid fa-user-check"></i>
-                    </div>
+    <header class="dash-topbar">
 
-                    <h2>Welcome!</h2>
+        <div class="dash-brand">
+            <div class="dash-logo">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <span>ClearTask</span>
+        </div>
 
-                    <p>
-                        You have successfully logged in.
-                    </p>
+        <div class="dash-user">
+            <div class="user-avatar">
+                <i class="fa-solid fa-user"></i>
+            </div>
 
-                    <div class="user-card">
+            <div class="dash-user-text">
+                <span>Logged in as</span>
+                <strong id="dashboardUser">Demo User</strong>
+            </div>
 
-                        <div class="user-avatar">
-                            <i class="fa-solid fa-user"></i>
-                        </div>
+            <button class="dash-logout" onclick="logout()">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Logout</span>
+            </button>
+        </div>
 
-                        <div>
-                            <span>Logged in as</span>
-                            <strong id="dashboardUser">
-                                Demo User
-                            </strong>
-                        </div>
+    </header>
 
-                    </div>
 
-                    <button
-                        class="logout-button"
-                        onclick="logout()"
-                    >
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                        Logout
-                    </button>
+    <main class="dash-main">
 
+        <section class="dash-hero">
+            <h1 id="dashGreeting">Welcome back!</h1>
+            <p id="dashDate"></p>
+        </section>
+
+
+        <!-- Stats -->
+        <section class="stats-grid">
+
+            <div class="stat-card">
+                <div class="stat-icon blue"><i class="fa-solid fa-list-check"></i></div>
+                <div>
+                    <span>Total Tasks</span>
+                    <strong id="statTotal">0</strong>
                 </div>
+            </div>
 
+            <div class="stat-card">
+                <div class="stat-icon green"><i class="fa-solid fa-circle-check"></i></div>
+                <div>
+                    <span>Completed</span>
+                    <strong id="statDone">0</strong>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon orange"><i class="fa-solid fa-hourglass-half"></i></div>
+                <div>
+                    <span>Pending</span>
+                    <strong id="statPending">0</strong>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon red"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div>
+                    <span>Overdue</span>
+                    <strong id="statOverdue">0</strong>
+                </div>
             </div>
 
         </section>
 
+
+        <section class="dash-grid">
+
+            <!-- Tasks -->
+            <div class="panel">
+
+                <div class="panel-header">
+                    <h3>My Tasks</h3>
+
+                    <div class="filter-tabs" id="filterTabs">
+                        <button type="button" class="active" data-filter="all">All</button>
+                        <button type="button" data-filter="active">Active</button>
+                        <button type="button" data-filter="done">Done</button>
+                    </div>
+                </div>
+
+                <form id="taskForm" class="task-form">
+                    <input type="text" id="taskInput" placeholder="Add a new task..." maxlength="80" required>
+
+                    <select id="taskPriority">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+
+                    <input type="date" id="taskDue">
+
+                    <button type="submit" class="add-task-btn">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Add</span>
+                    </button>
+                </form>
+
+                <ul id="taskList" class="task-list"></ul>
+
+                <div id="taskEmpty" class="task-empty">
+                    <i class="fa-regular fa-clipboard"></i>
+                    <p>No tasks here yet.</p>
+                </div>
+
+            </div>
+
+
+            <!-- Progress -->
+            <aside class="panel">
+
+                <div class="panel-header">
+                    <h3>Progress</h3>
+                </div>
+
+                <div class="progress-percent" id="progressPercent">0%</div>
+
+                <div class="progress-track">
+                    <div id="progressFill"></div>
+                </div>
+
+                <p class="progress-note" id="progressNote">
+                    Add a task to get started.
+                </p>
+
+                <button type="button" class="clear-done-btn" id="clearDoneBtn">
+                    <i class="fa-regular fa-trash-can"></i>
+                    Clear completed
+                </button>
+
+            </aside>
+
+        </section>
+
     </main>
+
+</div>
 
 
     <script src="script.js"></script>

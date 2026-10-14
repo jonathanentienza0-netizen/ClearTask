@@ -154,8 +154,34 @@ function updateWelcomePanel(pageId) {
 
 function showPage(pageId) {
 
-    updateWelcomePanel(pageId);
+    const authContainer = document.querySelector(".auth-container");
+    const dashboardView = document.getElementById("dashboardView");
 
+    if (pageId === "dashboardPage" && !dashboardView) {
+        console.error("#dashboardView not found in Index.html");
+        return;
+    }
+
+
+    /* Dashboard is a full-screen view, outside the login layout */
+
+    if (pageId === "dashboardPage") {
+
+        authContainer.style.display = "none";
+        dashboardView.classList.add("active");
+
+        initDashboard();
+        clearMessages();
+
+        window.scrollTo({ top: 0 });
+
+        return;
+    }
+
+    dashboardView.classList.remove("active");
+    authContainer.style.display = "";
+
+    updateWelcomePanel(pageId);
 
     const pages = document.querySelectorAll(".page");
 
@@ -1113,6 +1139,279 @@ function checkSession() {
 
 }
 
+/* ================= DASHBOARD ================= */
+
+let dashTasks = [];
+let dashFilter = "all";
+
+function tasksKey() {
+    return "clearTasks_" +
+        (sessionStorage.getItem("loggedUser") || "guest");
+}
+
+function loadTasks() {
+
+    const raw = localStorage.getItem(tasksKey());
+
+    /* First visit: give a few sample tasks */
+
+    if (raw === null) {
+
+        return [
+            { id: 1, title: "Explore your new dashboard", priority: "low",    due: "", done: true  },
+            { id: 2, title: "Add your first task",        priority: "medium", due: "", done: false },
+            { id: 3, title: "Finish the project report",  priority: "high",   due: "", done: false }
+        ];
+
+    }
+
+    try {
+        return JSON.parse(raw) || [];
+    } catch (error) {
+        return [];
+    }
+
+}
+
+function saveTasks() {
+    localStorage.setItem(tasksKey(), JSON.stringify(dashTasks));
+}
+
+function todayString() {
+
+    const d = new Date();
+
+    return d.getFullYear() + "-" +
+        String(d.getMonth() + 1).padStart(2, "0") + "-" +
+        String(d.getDate()).padStart(2, "0");
+
+}
+
+function isOverdue(task) {
+    return !task.done && task.due && task.due < todayString();
+}
+
+function initDashboard() {
+
+    const name =
+        sessionStorage.getItem("loggedUser") || "Demo User";
+
+    document.getElementById("dashboardUser").textContent = name;
+
+    const hour = new Date().getHours();
+
+    const greeting =
+        hour < 12 ? "Good morning" :
+        hour < 18 ? "Good afternoon" :
+                    "Good evening";
+
+    document.getElementById("dashGreeting").textContent =
+        greeting + ", " + name.split(" ")[0] + "!";
+
+    document.getElementById("dashDate").textContent =
+        new Date().toLocaleDateString(undefined, {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+        });
+
+    dashTasks = loadTasks();
+    dashFilter = "all";
+
+    document
+        .querySelectorAll("#filterTabs button")
+        .forEach(function(btn) {
+            btn.classList.toggle(
+                "active",
+                btn.dataset.filter === "all"
+            );
+        });
+
+    renderTasks();
+}
+
+function renderTasks() {
+
+    const list = document.getElementById("taskList");
+    const empty = document.getElementById("taskEmpty");
+
+    list.innerHTML = "";
+
+    const visible = dashTasks.filter(function(task) {
+        if (dashFilter === "active") return !task.done;
+        if (dashFilter === "done") return task.done;
+        return true;
+    });
+
+    visible.forEach(function(task) {
+
+        const li = document.createElement("li");
+        li.className = "task-item" + (task.done ? " done" : "");
+        li.dataset.id = task.id;
+
+        const check = document.createElement("input");
+        check.type = "checkbox";
+        check.checked = task.done;
+        check.className = "task-check";
+
+        const body = document.createElement("div");
+        body.className = "task-body";
+
+        const title = document.createElement("span");
+        title.className = "task-title";
+        title.textContent = task.title;
+
+        const meta = document.createElement("div");
+        meta.className = "task-meta";
+
+        const badge = document.createElement("span");
+        badge.className = "badge " + task.priority;
+        badge.textContent = task.priority;
+        meta.appendChild(badge);
+
+        if (task.due) {
+
+            const due = document.createElement("span");
+            due.textContent = "Due " + task.due;
+
+            if (isOverdue(task)) {
+                due.className = "overdue";
+                due.textContent += " (overdue)";
+            }
+
+            meta.appendChild(due);
+        }
+
+        body.appendChild(title);
+        body.appendChild(meta);
+
+        const del = document.createElement("button");
+        del.type = "button";
+        del.className = "task-delete";
+        del.setAttribute("aria-label", "Delete task");
+        del.innerHTML = '<i class="fa-regular fa-trash-can"></i>';
+
+        li.appendChild(check);
+        li.appendChild(body);
+        li.appendChild(del);
+
+        list.appendChild(li);
+    });
+
+    empty.style.display = visible.length ? "none" : "block";
+
+    updateStats();
+}
+
+function updateStats() {
+
+    const total = dashTasks.length;
+    const done = dashTasks.filter(t => t.done).length;
+    const pending = total - done;
+    const overdue = dashTasks.filter(isOverdue).length;
+    const percent = total ? Math.round((done / total) * 100) : 0;
+
+    document.getElementById("statTotal").textContent = total;
+    document.getElementById("statDone").textContent = done;
+    document.getElementById("statPending").textContent = pending;
+    document.getElementById("statOverdue").textContent = overdue;
+
+    document.getElementById("progressPercent").textContent = percent + "%";
+    document.getElementById("progressFill").style.width = percent + "%";
+
+    document.getElementById("progressNote").textContent =
+        total === 0 ? "Add a task to get started." :
+        pending === 0 ? "All done. Great job!" :
+        done + " of " + total + " tasks completed.";
+}
+
+/* Add task */
+
+document
+    .getElementById("taskForm")
+    .addEventListener("submit", function(event) {
+
+        event.preventDefault();
+
+        const input = document.getElementById("taskInput");
+        const title = input.value.trim();
+
+        if (!title) return;
+
+        dashTasks.unshift({
+            id: Date.now(),
+            title: title,
+            priority: document.getElementById("taskPriority").value,
+            due: document.getElementById("taskDue").value,
+            done: false
+        });
+
+        saveTasks();
+
+        input.value = "";
+        document.getElementById("taskDue").value = "";
+
+        renderTasks();
+    });
+
+/* Check / delete (event delegation) */
+
+document
+    .getElementById("taskList")
+    .addEventListener("click", function(event) {
+
+        const li = event.target.closest(".task-item");
+        if (!li) return;
+
+        const id = Number(li.dataset.id);
+
+        if (event.target.closest(".task-delete")) {
+
+            dashTasks = dashTasks.filter(t => t.id !== id);
+
+        } else if (event.target.classList.contains("task-check")) {
+
+            const task = dashTasks.find(t => t.id === id);
+            if (task) task.done = event.target.checked;
+
+        } else {
+            return;
+        }
+
+        saveTasks();
+        renderTasks();
+    });
+
+/* Filter tabs */
+
+document
+    .getElementById("filterTabs")
+    .addEventListener("click", function(event) {
+
+        const btn = event.target.closest("button");
+        if (!btn) return;
+
+        dashFilter = btn.dataset.filter;
+
+        this.querySelectorAll("button").forEach(function(b) {
+            b.classList.toggle("active", b === btn);
+        });
+
+        renderTasks();
+    });
+
+/* Clear completed */
+
+document
+    .getElementById("clearDoneBtn")
+    .addEventListener("click", function() {
+
+        dashTasks = dashTasks.filter(t => !t.done);
+
+        saveTasks();
+        renderTasks();
+    });
 
 /* intialize */
 
