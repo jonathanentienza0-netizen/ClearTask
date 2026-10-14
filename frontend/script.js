@@ -1,6 +1,6 @@
 
 const DEFAULT_ACCOUNT = {
-    username: "demo",
+    studentNumber: "demo",
     email: "demo@example.com",
     password: "Password123!",
     name: "Demo User"
@@ -51,13 +51,13 @@ function findAccount(identifier) {
     const id = identifier.toLowerCase();
 
     if (
-        id === DEFAULT_ACCOUNT.username.toLowerCase() ||
+        id === DEFAULT_ACCOUNT.studentNumber.toLowerCase() ||
         id === DEFAULT_ACCOUNT.email.toLowerCase()
     ) {
 
         return {
             name: DEFAULT_ACCOUNT.name,
-            username: DEFAULT_ACCOUNT.username,
+            studentNumber: DEFAULT_ACCOUNT.studentNumber,
             email: DEFAULT_ACCOUNT.email,
             password: getPassword()
         };
@@ -66,7 +66,7 @@ function findAccount(identifier) {
 
     return getUsers().find(function(user) {
 
-        return user.username.toLowerCase() === id
+        return user.studentNumber.toLowerCase() === id
             || user.email.toLowerCase() === id;
 
     }) || null;
@@ -74,9 +74,9 @@ function findAccount(identifier) {
 }
 
 
-function isUsernameTaken(username) {
+function isStudentNumberTaken(studentNumber) {
 
-    return findAccount(username) !== null;
+    return findAccount(studentNumber) !== null;
 
 }
 
@@ -330,7 +330,7 @@ document
         if (!identifier) {
 
             identifierError.textContent =
-                "Please enter your email or username.";
+                "Please enter your email or student number.";
 
             return;
         }
@@ -410,7 +410,7 @@ document
 
                 showMessage(
                     "loginMessage",
-                    "Invalid username/email or password.",
+                    "Invalid student number /email or password.",
                     "error"
                 );
 
@@ -855,9 +855,9 @@ document
                 .value
                 .trim();
 
-        const username =
+        const studentNumber =
             document
-                .getElementById("registerUsername")
+                .getElementById("registerStudentNumber")
                 .value
                 .trim();
 
@@ -887,7 +887,7 @@ document
 
         [
             "registerNameError",
-            "registerUsernameError",
+            "registerStudentNumberError",
             "registerEmailError",
             "registerConfirmError",
             "registerTermsError"
@@ -922,20 +922,20 @@ document
         }
 
 
-        if (!/^[A-Za-z0-9_.]{3,20}$/.test(username)) {
+        if (!/^[A-Za-z0-9_.]{3,20}$/.test(studentNumber)) {
 
             setFieldError(
-                "registerUsernameError",
+                "registerStudentNumberError",
                 "Use 3-20 letters, numbers, underscores or dots."
             );
 
             valid = false;
 
-        } else if (isUsernameTaken(username)) {
+        } else if (isStudentNumberTaken(studentNumber)) {
 
             setFieldError(
-                "registerUsernameError",
-                "That username is already taken."
+                "registerStudentNumberError",
+                "That student number is already taken."
             );
 
             valid = false;
@@ -1042,7 +1042,7 @@ document
 
             users.push({
                 name: name,
-                username: username,
+                studentNumber: studentNumber,
                 email: email,
                 password: password
             });
@@ -1060,13 +1060,13 @@ document
             resetRegisterForm();
 
 
-            /* Send the user to login with their username filled in */
+            /* Send the user to login with their student number filled in */
 
             showPage("loginPage");
 
             document.getElementById(
                 "loginIdentifier"
-            ).value = username;
+            ).value = studentNumber;
 
             document.getElementById(
                 "loginPassword"
