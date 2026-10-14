@@ -1,19 +1,24 @@
+
 import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase_admin import credentials, firestore, auth
+
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-from fastapi import FastAPI
-
+# Firebase connection
 cred = credentials.Certificate(
     "backend/cleartask-service-account.json"
 )
 
 firebase_admin.initialize_app(cred)
-
 db = firestore.client()
 
+# FastAPI application
 app = FastAPI()
+security = HTTPBearer()
 
+# CORS configuration for frontend development
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -23,6 +28,20 @@ app.add_middleware(
 )
 
 
+# Verify the student's Firebase ID token
+def verify_firebase_token(
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
+    try:
+        decoded_token = auth.verify_id_token(credentials.credentials)
+        return decoded_token
+    except Exception:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid or expired Firebase token"
+        )
+
+
 @app.get("/")
 def home():
     return {
@@ -30,27 +49,21 @@ def home():
     }
 
 
-@app.get("/clearance")
-def get_clearance():
-    return {
-        "student": "Juan Dela Cruz",
-        "status": "In Progress",
-        "tasks": [
-            {
-                "office": "Library",
-                "status": "Cleared"
-            },
-            {
-                "office": "Accounting",
-                "status": "Cleared"
-            },
-            {
-                "office": "Registrar",
-                "status": "Pending"
-            }
-        ]
-    }
+# List all active offices
+@app.get("/offices")
+def get_offices():
+    offices = db.collection("offices").stream()
 
+    return [
+        {
+            "id": office.id,
+            **(office.to_dict() or {})
+        }
+        for office in offices
+    ]
+
+
+# Test Firebase connection
 @app.get("/test-firebase")
 def test_firebase():
     collections = db.collections()
@@ -59,30 +72,57 @@ def test_firebase():
         "message": "Firebase connected successfully!",
         "collections": [collection.id for collection in collections]
     }
-@app.get("/offices")
-def get_offices():
-    offices = db.collection("offices").stream()
+
+
+# Get clearance tasks belonging to the logged-in student
+@app.get("/clearance-tasks")
+def get_clearance_tasks(
+    student=Depends(verify_firebase_token)
+):
+    email = student.get("email")
+
+    if not email:
+        raise HTTPException(
+            status_code=401,
+            detail="Your account must have an email address."
+        )
+
+    # Find the student's registered record
+    students = (
+        db.collection("students")
+        .where("email", "==", email)
+        .limit(1)
+        .stream()
+    )
+
+    student_record = next(students, None)
+
+    if student_record is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Student record not found."
+        )
+
+    student_data = student_record.to_dict() or {}
+    student_number = student_data.get("student_number")
+
+    if not student_number:
+        raise HTTPException(
+            status_code=404,
+            detail="Student number not found in student record."
+        )
+
+    # Return only this student's clearance tasks
+    tasks = (
+        db.collection("clearance_tasks")
+        .where("student_number", "==", student_number)
+        .stream()
+    )
 
     return [
         {
-            "id": office.id,
-            **office.to_dict()
+            "id": task.id,
+            **(task.to_dict() or {})
         }
-        for office in offices
+        for task in tasks
     ]
-@app.get("/clearance-tasks")
-def get_clearance_tasks(student_number: str):
-    tasks = db.collection("clearance_tasks").stream()
-
-    result = []
-
-    for task in tasks:
-        data = task.to_dict() or {}
-
-        if data.get("student_number") == student_number:
-            result.append({
-                "id": task.id,
-                **data
-            })
-
-    return result
