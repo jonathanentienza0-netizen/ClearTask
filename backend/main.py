@@ -28,7 +28,7 @@ app.add_middleware(
 )
 
 
-# Verify the student's Firebase ID token
+
 def verify_firebase_token(
     credentials: HTTPAuthorizationCredentials = Depends(security)
 ):
@@ -75,6 +75,7 @@ def test_firebase():
 
 
 # Get clearance tasks belonging to the logged-in student
+
 @app.get("/clearance-tasks")
 def get_clearance_tasks(
     student=Depends(verify_firebase_token)
@@ -87,7 +88,6 @@ def get_clearance_tasks(
             detail="Your account must have an email address."
         )
 
-    # Find the student's registered record
     students = (
         db.collection("students")
         .where("email", "==", email)
@@ -109,20 +109,37 @@ def get_clearance_tasks(
     if not student_number:
         raise HTTPException(
             status_code=404,
-            detail="Student number not found in student record."
+            detail="Student number not found."
         )
 
-    # Return only this student's clearance tasks
     tasks = (
         db.collection("clearance_tasks")
         .where("student_number", "==", student_number)
         .stream()
     )
 
+    offices = {}
+
+    for task in tasks:
+        data = task.to_dict() or {}
+        office_name = data.get("office_name", "Unassigned")
+
+        if office_name not in offices:
+            offices[office_name] = []
+
+        offices[office_name].append({
+            "id": task.id,
+            "task_name": data.get("task_name", "Unnamed task"),
+            "status": data.get("status", "Pending"),
+            "remarks": data.get("remarks", "")
+        })
+
     return [
         {
-            "id": task.id,
-            **(task.to_dict() or {})
+            "office_name": office_name,
+            "tasks": office_tasks
         }
-        for task in tasks
+        for office_name, office_tasks in offices.items()
     ]
+
+
