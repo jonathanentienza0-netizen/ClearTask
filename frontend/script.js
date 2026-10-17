@@ -1,5 +1,5 @@
 
-const SUPABASE_URL = "https://jirwifvvfcuczsszorsi.supabase.co";
+const SUPABASE_URL = "https://jirwifvvfcuczsszorsi.supabase.co/";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_ZVZhW6m9OPcIrcSVmrhCzw_Ro9UV-Ew";
 
 const supabaseClient = window.supabase.createClient(
@@ -279,50 +279,6 @@ if (resetForm) {
         showMessage("Password updated successfully. You can now log in.");
         showPage("loginPage");
     });
-}
-//Prince
-const DEFAULT_ACCOUNT = {
-    studentNumber: "demo",
-    email: "demo@example.com",
-    password: "Password123!",
-    name: "Demo User"
-};
-
-
-function getPassword() {
-
-    return localStorage.getItem("demoPassword")
-        || DEFAULT_ACCOUNT.password;
-
-}
-
-
-/* Accounts (frontend demo only) */
-
-function getUsers() {
-
-    try {
-
-        return JSON.parse(
-            localStorage.getItem("demoUsers")
-        ) || [];
-
-    } catch (error) {
-
-        return [];
-
-    }
-
-}
-
-
-function saveUsers(users) {
-
-    localStorage.setItem(
-        "demoUsers",
-        JSON.stringify(users)
-    );
-
 }
 
 

@@ -480,38 +480,6 @@ body {
 }
 
 
-/* ================= DEMO INFO ================= */
-
-.demo-info {
-    margin-top: 25px;
-
-    padding: 15px;
-
-    border-radius: 10px;
-
-    background: #f8f9fc;
-
-    border: 1px solid #e9ebf2;
-
-    font-size: 12px;
-
-    color: var(--muted);
-
-    line-height: 1.7;
-}
-
-.demo-info strong {
-    display: block;
-
-    color: var(--text);
-
-    margin-bottom: 5px;
-}
-
-.demo-info b {
-    color: var(--primary);
-}
-
 
 /* ================= BACK BUTTON ================= */
 
