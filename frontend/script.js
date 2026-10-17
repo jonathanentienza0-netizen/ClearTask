@@ -71,6 +71,8 @@ if (registerForm) {
             alert("Registration failed: " + error.message);
             return;
         }
+        //may binago ako dito
+        
 
         alert("Account created successfully!");
 registerForm.reset();
