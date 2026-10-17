@@ -395,6 +395,9 @@ function showPage(pageId) {
     const authContainer = document.querySelector(".auth-container");
     const dashboardView = document.getElementById("dashboardView");
 
+    /* [NEW] Left welcome panel becomes a left/top border on the dashboard */
+    setDashboardMode(pageId === "dashboardPage" || pageId === "dashboardView");
+
     if (pageId === "dashboardPage" && !dashboardView) {
         console.error("#dashboardView not found in Index.html");
         return;
@@ -405,7 +408,8 @@ function showPage(pageId) {
 
     if (pageId === "dashboardPage") {
 
-        authContainer.style.display = "none";
+        /* [CHANGED] keep the container visible (it holds the border now), hide only the auth pages */
+        document.querySelectorAll(".page").forEach(page => page.classList.remove("active"));
         dashboardView.classList.add("active");
 
         initDashboard();
@@ -950,6 +954,44 @@ function checkSession() {
     }
 
 }
+
+/* ================= [NEW] DASHBOARD BORDER / HOME / PROFILE ================= */
+
+/* Turn the left welcome panel into a left + top border (CSS: .dashboard-mode) */
+function setDashboardMode(on) {
+    const authContainer = document.querySelector(".auth-container");
+
+    if (authContainer) {
+        authContainer.classList.toggle("dashboard-mode", on);
+    }
+
+    if (!on) closeProfile();
+}
+
+/* Home button (top left) */
+function goHome() {
+    closeProfile();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* Profile modal (button beside Logout, top right) */
+function openProfile() {
+    document.getElementById("profileName").textContent =
+        document.getElementById("dashboardUser").textContent;
+
+    document.getElementById("profileModal").classList.add("open");
+}
+
+function closeProfile() {
+    const modal = document.getElementById("profileModal");
+
+    if (modal) modal.classList.remove("open");
+}
+
+document.addEventListener("keydown", function(event) {
+    if (event.key === "Escape") closeProfile();
+});
+
 
 /* ================= DASHBOARD ================= */
 

@@ -750,11 +750,21 @@
 
     <header class="dash-topbar">
 
-        <div class="dash-brand">
-            <div class="dash-logo">
-                <i class="fa-solid fa-shield-halved"></i>
+        <!-- [NEW] TOP LEFT: HOME BUTTON + BRAND -->
+        <div class="dash-left">
+
+            <button type="button" class="dash-home" onclick="goHome()" aria-label="Home">
+                <i class="fa-solid fa-house"></i>
+                <span>Home</span>
+            </button>
+
+            <div class="dash-brand">
+                <div class="dash-logo">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <span>ClearTask</span>
             </div>
-            <span>ClearTask</span>
+
         </div>
 
         <div class="dash-user">
@@ -767,6 +777,12 @@
                 <strong id="dashboardUser">Demo User</strong>
             </div>
 
+            <!-- [NEW] PROFILE BUTTON (beside Logout) -->
+            <button type="button" class="dash-profile" onclick="openProfile()">
+                <i class="fa-regular fa-id-badge"></i>
+                <span>Profile</span>
+            </button>
+
             <button class="dash-logout" onclick="logout()">
                 <i class="fa-solid fa-right-from-bracket"></i>
                 <span>Logout</span>
@@ -774,6 +790,23 @@
         </div>
 
     </header>
+
+
+    <!-- [NEW] PROFILE MODAL -->
+    <div id="profileModal" class="profile-modal" onclick="if (event.target === this) closeProfile()">
+        <div class="profile-card">
+            <button type="button" class="profile-close" onclick="closeProfile()" aria-label="Close profile">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="profile-avatar">
+                <i class="fa-solid fa-user"></i>
+            </div>
+
+            <h3 id="profileName">Demo User</h3>
+            <p>Logged in to ClearTask</p>
+        </div>
+    </div>
 
 
     <main class="dash-main">
