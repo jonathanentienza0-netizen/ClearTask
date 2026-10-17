@@ -1322,7 +1322,8 @@ body {
 ======================================================================== */
 
 .auth-container.dashboard-mode {
-    --frame: 14px;
+    --frame: 14px;       /* thickness of the LEFT border */
+    --frame-top: 72px;   /* thickness of the TOP border (holds the header) */
 
     display: block;
 }
@@ -1332,16 +1333,16 @@ body {
     display: block;            /* overrides the mobile display:none */
     position: fixed;
     inset: 0;
-    z-index: 50;
+    z-index: 5;                /* below the top bar (z-index 10) so the header sits inside the border */
 
     padding: 0;
     pointer-events: none;      /* clicks pass through to the dashboard */
 
     -webkit-mask:
-        linear-gradient(#000 0 0) top  / 100% var(--frame) no-repeat,
+        linear-gradient(#000 0 0) top  / 100% var(--frame-top) no-repeat,
         linear-gradient(#000 0 0) left / var(--frame) 100% no-repeat;
             mask:
-        linear-gradient(#000 0 0) top  / 100% var(--frame) no-repeat,
+        linear-gradient(#000 0 0) top  / 100% var(--frame-top) no-repeat,
         linear-gradient(#000 0 0) left / var(--frame) 100% no-repeat;
 }
 
@@ -1363,9 +1364,44 @@ body {
     max-width: none;
 }
 
-/* Keep the top bar clear of the top border */
+/* Top bar now lives INSIDE the top border (transparent over the gradient) */
 .auth-container.dashboard-mode .dash-topbar {
-    padding-top: calc(var(--frame) + 14px);
+    height: var(--frame-top);
+
+    margin-left: calc(var(--frame) * -1);   /* start at the screen edge */
+    padding: 0 28px 0 calc(var(--frame) + 24px);
+
+    background: transparent;
+    border-bottom: none;
+    color: white;
+}
+
+/* Header items restyled for the gradient background */
+.auth-container.dashboard-mode .dash-logo,
+.auth-container.dashboard-mode .user-avatar {
+    background: rgba(255, 255, 255, 0.22);
+}
+
+.auth-container.dashboard-mode .dash-user-text span {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.auth-container.dashboard-mode .dash-home,
+.auth-container.dashboard-mode .dash-profile {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.35);
+    color: white;
+}
+
+.auth-container.dashboard-mode .dash-home:hover,
+.auth-container.dashboard-mode .dash-profile:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: white;
+    color: white;
+}
+
+.auth-container.dashboard-mode .dash-logout {
+    border-color: white;
 }
 
 
