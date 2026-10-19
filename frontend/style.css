@@ -1648,3 +1648,31 @@ body {
         grid-template-columns: repeat(2, 1fr);
     }
 }
+/* Overall Clearance Status */
+.clearance-status {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #f8fafc;
+}
+
+.clearance-status span {
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.clearance-status strong {
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .clearance-status {
+        padding: 6px 10px;
+    }
+}

@@ -7,21 +7,8 @@ const supabaseClient = window.supabase.createClient(
     SUPABASE_PUBLISHABLE_KEY
 );
 
-// Helper: show one page and hide the others
-function showPage(pageId) {
-    document.querySelectorAll(
-        "#loginPage, #registerPage, #forgotPage, #resetPage, #successPage, #dashboardView"
-    ).forEach(page => {
-        page.style.display = page.id === pageId ? "block" : "none";
-    });
-}
 
-// Helper: display a message without requiring new HTML
-function showMessage(message) {
-    alert(message);
-}
 
-// REGISTRATION
 const registerForm = document.getElementById("registerForm");
 
 if (registerForm) {
@@ -108,22 +95,42 @@ if (loginForm) {
 }
 
 // LOAD DASHBOARD
+
 async function loadDashboard(user) {
+    const { data: student, error } = await supabaseClient
+        .from("students")
+        .select("full_name, student_number")
+        .eq("id", user.id)
+        .single();
+
+    if (error) {
+        console.error("Error loading student profile:", error);
+    }
+
+    const studentName =
+        student?.full_name ||
+        user.user_metadata?.full_name ||
+        user.email;
+
     const userLabel = document.getElementById("dashboardUser");
     const greeting = document.getElementById("dashGreeting");
 
     if (userLabel) {
-        userLabel.textContent = user.user_metadata?.full_name || user.email;
+        userLabel.textContent = studentName;
     }
 
     if (greeting) {
-        greeting.textContent =
-            "Welcome, " + (user.user_metadata?.full_name || "Student") + "!";
+        greeting.textContent = "Welcome, " + studentName + "!";
     }
 
-    showPage("dashboardView");
-    await loadClearanceTasks();
+    showPage("dashboardPage");
+    
+
+document.getElementById("dashboardUser").textContent = studentName;
+
+await loadClearanceTasks();
 }
+
 
 /* Password visibility on and off */
 
@@ -155,57 +162,279 @@ function togglePassword(inputId, button) {
 
 
 // SHOW THE STUDENT'S CLEARANCE TASKS
+
 async function loadClearanceTasks() {
     const taskList = document.getElementById("taskList");
     const taskEmpty = document.getElementById("taskEmpty");
 
-    if (!taskList) return;
+    if (!taskList) {
+        console.error("Task list element not found.");
+        return;
+    }
 
     taskList.innerHTML = "";
 
- const {
-    data: { user },
-    error: userError
-} = await supabaseClient.auth.getUser();
+    const { data: { user }, error: userError } =
+        await supabaseClient.auth.getUser();
 
-if (userError || !user) {
-    showMessage("Please log in to view your clearance tasks.");
-    return;
+    if (userError || !user) {
+        console.error("Student is not logged in.");
+        return;
+    }
+
+    const { data: tasks, error } = await supabaseClient
+        .from("clearance_tasks")
+        .select(`
+            id,
+            task_name,
+            status,
+            remarks,
+            deadline,
+            requirement_id,
+            offices (
+                office_name
+            )
+        `)
+        .eq("student_id", user.id)
+        .not("requirement_id", "is", null)
+        .order("created_at", { ascending: true });
+
+    if (error) {
+        console.error("Error loading clearance tasks:", error);
+        taskList.textContent = "Unable to load clearance tasks.";
+        return;
+    }
+
+    if (!tasks || tasks.length === 0) {
+        if (taskEmpty) taskEmpty.style.display = "block";
+        return;
+    }
+
+       if (taskEmpty) taskEmpty.style.display = "none";
+      
+                const requiredOffices = [
+                    "Library",
+                    "Guidance",
+                    "Accounting"
+                ];
+
+                const pendingOffices = requiredOffices.filter(office => {
+                    const officeTasks = tasks.filter(task =>
+                        task.offices?.office_name === office
+                    );
+
+                    return officeTasks.length === 0 ||
+                        officeTasks.some(task => task.status !== "Cleared");
+                });
+
+                const overallStatus = document.getElementById(
+                    "overallClearanceStatus"
+                );
+
+                if (overallStatus) {
+                    const fullyCleared = pendingOffices.length === 0;
+
+                    overallStatus.textContent = fullyCleared
+                        ? "Fully Cleared"
+                        : "Pending";
+
+                    overallStatus.style.color = fullyCleared
+                        ? "#16a34a"
+                        : "#ea580c";
 }
+            const total = tasks.length;
 
-const { data, error } = await supabaseClient
-    .from("clearance_tasks")
-    .select("id, task_name, status, remarks, offices(office_name)")
-    .eq("student_id", user.id)
-    .order("created_at", { ascending: true });
+            const completed = tasks.filter(
+                     task => task.status === "Cleared"
+                ).length;
 
-    if (taskEmpty) taskEmpty.style.display = "none";
+            const pending = tasks.filter(
+                    task => task.status === "Pending"
+                ).length;
 
-    data.forEach(task => {
+            const today = new Date().toISOString().split("T")[0];
+
+            const overdue = tasks.filter(
+                    task =>
+                    task.deadline &&
+                    task.deadline < today &&
+                    task.status === "Pending"
+            ).length;
+
+// Update dashboard statistics
+            document.getElementById("statTotal").textContent = total;
+            document.getElementById("statDone").textContent = completed;
+            document.getElementById("statPending").textContent = pending;
+            document.getElementById("statOverdue").textContent = overdue;
+            // Calculate clearance progress
+            const progress = total > 0
+                ? Math.round((completed / total) * 100)
+                : 0;
+
+            // Update progress percentage
+            document.getElementById("progressPercent").textContent =
+                progress + "%";
+
+            // Update progress bar
+            document.getElementById("progressFill").style.width =
+                progress + "%";
+
+            // Update progress message
+            document.getElementById("progressNote").textContent =
+                `${completed} of ${total} clearance requirements completed.`;
+
+                // Replace existing list with the latest query result
+                const fragment = document.createDocumentFragment();
+
+    const filteredTasks = tasks.filter(task => {
+    if (dashFilter === "active") {
+        return task.status === "Pending";
+    }
+
+    if (dashFilter === "done") {
+        return task.status === "Cleared";
+    }
+
+    return true;
+});
+
+filteredTasks.forEach(task => {
         const item = document.createElement("div");
         item.className = "task-item";
 
-        const officeName = task.offices?.office_name || "Office not specified";
-        const status = task.status || "Pending";
+        const officeName =
+            task.offices?.office_name || "Unknown Office";
 
         const title = document.createElement("strong");
         title.textContent = task.task_name;
 
         const details = document.createElement("p");
-        details.textContent = `Office: ${officeName} | Status: ${status}`;
+        details.textContent =
+            `Office: ${officeName} | Status: ${task.status}`;
 
         item.appendChild(title);
         item.appendChild(details);
+        // Add proof upload control for pending requirements
+                if (task.status === "Pending") {
+                    const uploadInput = document.createElement("input");
+                    uploadInput.type = "file";
+                    uploadInput.accept = ".pdf,.jpg,.jpeg,.png";
+                    uploadInput.style.display = "none";
 
-        if (task.remarks) {
-            const remarks = document.createElement("p");
-            remarks.textContent = "Remarks: " + task.remarks;
-            item.appendChild(remarks);
+                    const uploadButton = document.createElement("button");
+                    uploadButton.type = "button";
+                    uploadButton.textContent = "Upload Proof";
+                    uploadButton.className = "upload-proof-btn";
+
+                    uploadButton.addEventListener("click", () => {
+                        uploadInput.click();
+                    });
+                    uploadInput.addEventListener("change", async () => {
+                            const file = uploadInput.files[0];
+                            if (!file) return;
+
+                            const allowedTypes = [
+                                "application/pdf",
+                                "image/jpeg",
+                                "image/png"
+                            ];
+
+                            if (!allowedTypes.includes(file.type)) {
+                                alert("PDF, JPG, or PNG files only.");
+                                uploadInput.value = "";
+                                return;
+                            }
+
+                            if (file.size > 5 * 1024 * 1024) {
+                                alert("Maximum file size is 5 MB.");
+                                uploadInput.value = "";
+                                return;
+                            }
+
+                            uploadButton.disabled = true;
+                            uploadButton.textContent = "Uploading...";
+
+                            try {
+                                const { data: { user }, error: authError } =
+                                    await supabaseClient.auth.getUser();
+
+                                if (authError || !user) {
+                                    throw new Error("Please log in again.");
+                                }
+
+                                const extension = file.name.split(".").pop().toLowerCase();
+                                const filePath =
+                                    `${user.id}/${task.id}/proof-${crypto.randomUUID()}.${extension}`;
+
+                                const { error: uploadError } = await supabaseClient.storage
+                                    .from("clearance-proofs")
+                                    .upload(filePath, file, {
+                                        contentType: file.type,
+                                        upsert: false
+                                    });
+
+                               if (uploadError) throw uploadError;
+
+                                        
+                                        const { error: completionError } = await supabaseClient.rpc(
+                                            "complete_my_clearance_task",
+                                            {
+                                                p_task_id: task.id,
+                                                p_file_path: filePath
+                                            }
+                                        );
+
+                                        if (completionError) {
+                                            throw new Error(
+                                                "Proof uploaded, but clearance status was not updated: " +
+                                                completionError.message
+                                            );
+                                        }
+
+                                        alert("Proof submitted! Requirement marked as Cleared.");
+
+                                        
+                                        await loadClearanceTasks();
+                            } catch (error) {
+                                console.error("Proof upload error:", error);
+                                alert("Upload failed: " + error.message);
+                            } finally {
+                                uploadButton.disabled = false;
+                                uploadButton.textContent = "Upload Proof";
+                                uploadInput.value = "";
+                            }
+                        });
+
+                    item.appendChild(uploadButton);
+                    item.appendChild(uploadInput);
+                }
+
+        if (task.deadline) {
+            const deadline = document.createElement("p");
+            deadline.textContent = `Deadline: ${task.deadline}`;
+            item.appendChild(deadline);
         }
-
-        taskList.appendChild(item);
+        fragment.appendChild(item);
     });
+
+    taskList.replaceChildren(fragment);
+    if (taskEmpty) {
+    taskEmpty.style.display =
+        filteredTasks.length === 0 ? "block" : "none";
+
+    const message = taskEmpty.querySelector("p");
+
+    if (message) {
+        message.textContent =
+            dashFilter === "done"
+                ? "No cleared requirements yet."
+                : dashFilter === "active"
+                ? "No pending requirements."
+                : "No clearance requirements found.";
+    }
 }
+}
+
 
 // LOGOUT
 document.addEventListener("click", async event => {
@@ -466,14 +695,22 @@ function clearMessages() {
 /* Showroom msgs */
 
 function showMessage(elementId, message, type) {
+    // Supports simple messages from Supabase
+    if (arguments.length === 1) {
+        alert(elementId);
+        return;
+    }
 
     const element = document.getElementById(elementId);
 
+    if (!element) {
+        alert(message);
+        return;
+    }
+
     element.textContent = message;
-
-    element.className = "message " + type;
+    element.className = "message " + (type || "error");
 }
-
 
 /* Password visibility on and off */
 
@@ -522,153 +759,6 @@ function loadRememberedUser() {
 
 }
 
-
-/* lOGin */
-
-document
-    .getElementById("loginForm")
-    .addEventListener("submit", function(event) {
-
-        event.preventDefault();
-
-
-        const identifier =
-            document
-                .getElementById("loginIdentifier")
-                .value
-                .trim();
-
-        const password =
-            document
-                .getElementById("loginPassword")
-                .value;
-
-        const rememberMe =
-            document
-                .getElementById("rememberMe")
-                .checked;
-
-
-        const identifierError =
-            document.getElementById(
-                "loginIdentifierError"
-            );
-
-        const passwordError =
-            document.getElementById(
-                "loginPasswordError"
-            );
-
-
-        identifierError.textContent = "";
-
-        passwordError.textContent = "";
-
-
-        /* Validation */
-
-        if (!identifier) {
-
-            identifierError.textContent =
-                "Please enter your email or student number.";
-
-            return;
-        }
-
-
-        if (!password) {
-
-            passwordError.textContent =
-                "Please enter your password.";
-
-            return;
-        }
-
-
-        /* Loading */
-
-        const button =
-            document.getElementById("loginButton");
-
-        button.classList.add("loading");
-
-        button.innerHTML =
-            `<span>Signing in...</span>
-             <i class="fa-solid fa-spinner fa-spin"></i>`;
-
-
-        setTimeout(function() {
-
-            const account = findAccount(identifier);
-
-
-            if (account && password === account.password) {
-
-                /* Remember Me */
-
-                if (rememberMe) {
-
-                    localStorage.setItem(
-                        "rememberedUser",
-                        identifier
-                    );
-
-                } else {
-
-                    localStorage.removeItem(
-                        "rememberedUser"
-                    );
-
-                }
-
-
-                /* Save session */
-
-                sessionStorage.setItem(
-                    "loggedIn",
-                    "true"
-                );
-
-
-                sessionStorage.setItem(
-                    "loggedUser",
-                    account.name
-                );
-
-
-                /* Dashboard */
-
-                document.getElementById(
-                    "dashboardUser"
-                ).textContent = account.name;
-
-
-                showPage("dashboardPage");
-
-
-            } else {
-
-                showMessage(
-                    "loginMessage",
-                    "Invalid student number /email or password.",
-                    "error"
-                );
-
-            }
-
-
-            /* Restore button */
-
-            button.classList.remove("loading");
-
-            button.innerHTML =
-                `<span>Sign In</span>
-                 <i class="fa-solid fa-arrow-right"></i>`;
-
-
-        }, 800);
-
-    });
 
 
 /* Nakalimutang password */
@@ -900,58 +990,36 @@ document
 
 /* ================= LOGOUT ================= */
 
-function logout() {
-
-    sessionStorage.removeItem(
-        "loggedIn"
-    );
-
-    sessionStorage.removeItem(
-        "loggedUser"
-    );
 
 
-    document.getElementById(
-        "loginPassword"
-    ).value = "";
+    
+async function logout() {
 
+    // End the Supabase authentication session
+    const { error } = await supabaseClient.auth.signOut();
 
+    if (error) {
+        console.error("Logout error:", error);
+        alert("Logout failed. Please try again.");
+        return;
+    }
+
+    // Clear old session data
+    sessionStorage.removeItem("loggedIn");
+    sessionStorage.removeItem("loggedUser");
+
+    // Clear password field
+    const passwordInput = document.getElementById("loginPassword");
+
+    if (passwordInput) {
+        passwordInput.value = "";
+    }
+
+    // Return to login page
     showPage("loginPage");
 
 }
 
-
-/* check session */
-
-function checkSession() {
-
-    const loggedIn =
-        sessionStorage.getItem(
-            "loggedIn"
-        );
-
-
-    if (loggedIn === "true") {
-
-        const loggedUser =
-            sessionStorage.getItem(
-                "loggedUser"
-            );
-
-        document.getElementById(
-            "dashboardUser"
-        ).textContent =
-            loggedUser || "Demo User";
-
-        showPage("dashboardPage");
-
-    } else {
-
-        showPage("loginPage");
-
-    }
-
-}
 
 /* ================= [NEW] DASHBOARD BORDER / HOME / PROFILE ================= */
 
@@ -1046,7 +1114,7 @@ function isOverdue(task) {
 function initDashboard() {
 
     const name =
-        sessionStorage.getItem("loggedUser") || "Demo User";
+    document.getElementById("dashboardUser").textContent.trim() || "Student";
 
     document.getElementById("dashboardUser").textContent = name;
 
@@ -1239,7 +1307,7 @@ document
 
 document
     .getElementById("filterTabs")
-    .addEventListener("click", function(event) {
+    .addEventListener("click", async function(event) {
 
         const btn = event.target.closest("button");
         if (!btn) return;
@@ -1250,7 +1318,7 @@ document
             b.classList.toggle("active", b === btn);
         });
 
-        renderTasks();
+        await loadClearanceTasks();
     });
 
 /* Clear completed */
@@ -1304,7 +1372,7 @@ checkSession();
 
 
 const officeNames = [
-    "Library", "Registrar", "Guidance", "Finance"
+    "Library", "Registrar", "Guidance", "Accounting"
 ];
 
 let currentOffice = null;
@@ -1323,7 +1391,7 @@ const officeFieldConfigs = {
         ["papers", "Papers to Submit", "text"],
         ["due_date", "Deadline", "date"]
     ],
-    Finance: [
+    Accounting: [
         ["balance", "Balance to Be Paid", "number"],
         ["due_date", "Due Date", "date"]
     ]
@@ -1446,14 +1514,15 @@ document.getElementById("officeTaskForm")
         this.reset();
         await loadOfficeTasks();
     });
-
-// DISPLAY TASKS
+// DISPLAY CLEARANCE REQUIREMENTS PER OFFICE
 async function loadOfficeTasks() {
     const office = currentOffice;
     if (!office) return;
 
     const list = document.getElementById("officeTaskList");
-    list.textContent = "Loading tasks...";
+    if (!list) return;
+
+    list.textContent = "Loading requirements...";
 
     const { data: { user }, error: authError } =
         await supabaseClient.auth.getUser();
@@ -1463,81 +1532,78 @@ async function loadOfficeTasks() {
         return;
     }
 
-    const { data, error } = await supabaseClient
-        .from("student_office_tasks")
-        .select("*")
+    const { data: tasks, error } = await supabaseClient
+        .from("clearance_tasks")
+        .select(`
+            id,
+            task_name,
+            status,
+            offices (
+                office_name
+            )
+        `)
         .eq("student_id", user.id)
-        .eq("office", office)
-        .order("created_at", { ascending: false });
+        .not("requirement_id", "is", null);
 
+    // Prevent results from appearing on the wrong office page
     if (currentOffice !== office) return;
 
     if (error) {
-        list.textContent = error.message;
+        console.error("Office requirements error:", error);
+        list.textContent = "Unable to load requirements.";
         return;
     }
 
     list.replaceChildren();
 
-    if (!data.length) {
-        list.textContent = "No tasks added yet.";
+    // Registrar is automatically cleared when all
+    // other offices have completed requirements.
+    if (office === "Registrar") {
+        const requiredOffices = [
+            "Library",
+            "Guidance",
+            "Accounting"
+        ];
+
+       const pendingOffices = requiredOffices.filter(name => {
+                const officeTasks = tasks.filter(task =>
+                    task.offices?.office_name === name
+                );
+
+                return officeTasks.length === 0 ||
+                    officeTasks.some(task => task.status !== "Cleared");
+            });
+        const message = document.createElement("p");
+
+        message.textContent = pendingOffices.length === 0
+            ? "Registrar Status: Cleared"
+            : "Registrar Status: Pending. Complete: " +
+              pendingOffices.join(", ");
+
+        list.appendChild(message);
         return;
     }
 
-    data.forEach(task => {
+    const officeTasks = tasks.filter(task =>
+        task.offices?.office_name === office
+    );
+
+    if (officeTasks.length === 0) {
+        list.textContent = "No clearance requirements found.";
+        return;
+    }
+
+    officeTasks.forEach(task => {
         const item = document.createElement("div");
         item.className = "office-task";
 
-        function addDetail(label, value) {
-            const p = document.createElement("p");
-            p.textContent = label + ": " + value;
-            item.appendChild(p);
-        }
+        const title = document.createElement("strong");
+        title.textContent = task.task_name;
 
-        function formatDate(date) {
-            if (!date) return "N/A";
-            const [y, m, d] = date.split("-");
-            return `${d}/${m}/${y}`;
-        }
+        const status = document.createElement("p");
+        status.textContent = "Status: " + task.status;
 
-        if (office === "Library") {
-            addDetail("Books Borrowed", task.books_borrowed);
-            addDetail("Date Borrowed",
-                formatDate(task.date_borrowed));
-            addDetail("Return Date",
-                formatDate(task.due_date));
-        }
-
-        if (office === "Registrar" ||
-            office === "Guidance") {
-            addDetail("Papers to Submit", task.papers);
-            addDetail("Deadline", formatDate(task.due_date));
-        }
-
-        if (office === "Finance") {
-            addDetail("Balance", task.balance);
-            addDetail("Due Date", formatDate(task.due_date));
-        }
-
-        addDetail("Status",
-            task.done ? "Completed" : "Pending");
-
-        const statusButton = document.createElement("button");
-        statusButton.type = "button";
-        statusButton.textContent =
-            task.done ? "Mark Pending" : "Mark Completed";
-
-        statusButton.onclick = () =>
-            updateOfficeTask(task.id, !task.done);
-
-        const deleteButton = document.createElement("button");
-        deleteButton.type = "button";
-        deleteButton.textContent = "Delete";
-
-        deleteButton.onclick = () =>
-            deleteOfficeTask(task.id);
-
-        item.append(statusButton, deleteButton);
+        item.append(title, status);
         list.appendChild(item);
     });
 }

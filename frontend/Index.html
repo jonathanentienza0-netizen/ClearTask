@@ -776,8 +776,12 @@
                 <span>Logged in as</span>
                 <strong id="dashboardUser">Demo User</strong>
             </div>
+            <div class="clearance-status">
+                <span>Overall Clearance</span>
+                <strong id="overallClearanceStatus">Checking...</strong>
+            </div>
 
-            <!-- [NEW] PROFILE BUTTON (beside Logout) -->
+            
             <button type="button" class="dash-profile" onclick="openProfile()">
                 <i class="fa-regular fa-id-badge"></i>
                 <span>Profile</span>
@@ -825,8 +829,8 @@
         <strong>G</strong><span>Guidance</span>
     </button>
 
-    <button type="button" onclick="openOffice('Finance')">
-        <strong>F</strong><span>Finance</span>
+    <button type="button" onclick="openOffice('Accounting')">
+        <strong>A</strong><span>Accounting</span>
     </button>
 </div>
 
@@ -835,7 +839,7 @@
     <h2 id="officeTitle"></h2>
     <p>Add and manage your clearance requirements.</p>
 
-    <form id="officeTaskForm">
+    <form id="officeForm" style="display: none;">
         <div id="officeFields"></div>
         <button type="submit" class="add-task-btn">
             <i class="fa-solid fa-plus"></i> Add Task
@@ -897,16 +901,16 @@
             <div class="panel">
 
                 <div class="panel-header">
-                    <h3>My Tasks</h3>
+                    <h3>My Clearance Requirements</h3>
 
                     <div class="filter-tabs" id="filterTabs">
                         <button type="button" class="active" data-filter="all">All</button>
-                        <button type="button" data-filter="active">Active</button>
-                        <button type="button" data-filter="done">Done</button>
+                        <button type="button" data-filter="active">Pending</button>
+                        <button type="button" data-filter="done">Cleared</button>
                     </div>
                 </div>
 
-                <form id="taskForm" class="task-form">
+                <form id="taskForm" class="task-form" style="display: none;">
                     <input type="text" id="taskInput" placeholder="Add a new task..." maxlength="80" required>
 
                     <select id="taskPriority">
@@ -950,7 +954,7 @@
                     Add a task to get started.
                 </p>
 
-                <button type="button" class="clear-done-btn" id="clearDoneBtn">
+                <button type="button" class="clear-done-btn" id="clearDoneBtn" style="display: none;">
                     <i class="fa-regular fa-trash-can"></i>
                     Clear completed
                 </button>
