@@ -163,23 +163,21 @@ async function loadClearanceTasks() {
 
     taskList.innerHTML = "";
 
-    const { data, error } = await supabaseClient
-        .from("clearance_tasks")
-        .select("id, task_name, status, remarks, offices(office_name)")
-        .order("created_at", { ascending: true });
+ const {
+    data: { user },
+    error: userError
+} = await supabaseClient.auth.getUser();
 
-    if (error) {
-        showMessage("Unable to load clearance tasks: " + error.message);
-        return;
-    }
+if (userError || !user) {
+    showMessage("Please log in to view your clearance tasks.");
+    return;
+}
 
-    if (!data || data.length === 0) {
-        if (taskEmpty) {
-            taskEmpty.style.display = "block";
-            taskEmpty.textContent = "No clearance tasks have been assigned yet.";
-        }
-        return;
-    }
+const { data, error } = await supabaseClient
+    .from("clearance_tasks")
+    .select("id, task_name, status, remarks, offices(office_name)")
+    .eq("student_id", user.id)
+    .order("created_at", { ascending: true });
 
     if (taskEmpty) taskEmpty.style.display = "none";
 
