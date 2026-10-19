@@ -1535,3 +1535,116 @@ body {
     }
 
 }
+
+/* OFFICE NAVIGATION */
+.office-navigation {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 25px;
+}
+
+.office-navigation button {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 22px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    font-family: inherit;
+    transition: 0.2s;
+}
+
+.office-navigation button:hover {
+    border-color: #5b5cf0;
+    transform: translateY(-3px);
+}
+
+.office-navigation strong {
+    background: #5b5cf0;
+    color: white;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    font-size: 22px;
+}
+
+.office-navigation span {
+    font-weight: 600;
+}
+
+/* OFFICE CONTENT */
+.office-section {
+    background: white;
+    border-radius: 14px;
+    padding: 25px;
+    margin-bottom: 25px;
+    border: 1px solid #e5e7eb;
+}
+
+.office-section[hidden],
+.office-navigation[hidden] {
+    display: none !important;
+}
+
+.office-section h2,
+.office-section h3 {
+    margin-bottom: 15px;
+}
+
+.office-section p {
+    margin-bottom: 20px;
+    color: #6b7280;
+}
+
+#officeTaskForm {
+    display: grid;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+#officeFields {
+    display: grid;
+    gap: 15px;
+}
+
+.office-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.office-field input {
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    width: 100%;
+}
+
+.office-task {
+    padding: 15px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    margin-bottom: 12px;
+}
+
+.office-task p {
+    margin: 6px 0;
+}
+
+.office-task button {
+    margin: 8px 8px 0 0;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+@media (max-width: 600px) {
+    .office-navigation {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

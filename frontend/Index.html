@@ -810,6 +810,42 @@
 
 
     <main class="dash-main">
+        
+<!-- OFFICE NAVIGATION -->
+<div id="officeNavigation" class="office-navigation">
+    <button type="button" onclick="openOffice('Library')">
+        <strong>L</strong><span>Library</span>
+    </button>
+
+    <button type="button" onclick="openOffice('Registrar')">
+        <strong>R</strong><span>Registrar</span>
+    </button>
+
+    <button type="button" onclick="openOffice('Guidance')">
+        <strong>G</strong><span>Guidance</span>
+    </button>
+
+    <button type="button" onclick="openOffice('Finance')">
+        <strong>F</strong><span>Finance</span>
+    </button>
+</div>
+
+<!-- OFFICE SECTION -->
+<section id="officeSection" class="office-section" hidden>
+    <h2 id="officeTitle"></h2>
+    <p>Add and manage your clearance requirements.</p>
+
+    <form id="officeTaskForm">
+        <div id="officeFields"></div>
+        <button type="submit" class="add-task-btn">
+            <i class="fa-solid fa-plus"></i> Add Task
+        </button>
+    </form>
+
+    <h3>Office Tasks</h3>
+    <div id="officeTaskList"></div>
+</section>
+
 
         <section class="dash-hero">
             <h1 id="dashGreeting">Welcome back!</h1>

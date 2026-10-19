@@ -1301,3 +1301,275 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
 });
 
 checkSession();
+
+
+const officeNames = [
+    "Library", "Registrar", "Guidance", "Finance"
+];
+
+let currentOffice = null;
+
+const officeFieldConfigs = {
+    Library: [
+        ["books_borrowed", "Books Borrowed", "number"],
+        ["date_borrowed", "Date Borrowed", "date"],
+        ["due_date", "When to Return", "date"]
+    ],
+    Registrar: [
+        ["papers", "Papers to Submit", "text"],
+        ["due_date", "Deadline", "date"]
+    ],
+    Guidance: [
+        ["papers", "Papers to Submit", "text"],
+        ["due_date", "Deadline", "date"]
+    ],
+    Finance: [
+        ["balance", "Balance to Be Paid", "number"],
+        ["due_date", "Due Date", "date"]
+    ]
+};
+
+function openOffice(office) {
+    if (!officeNames.includes(office)) return;
+
+    currentOffice = office;
+
+    document.getElementById("officeTitle").textContent =
+        office;
+
+    const fields = document.getElementById("officeFields");
+    fields.replaceChildren();
+
+    officeFieldConfigs[office].forEach(([name, label, type]) => {
+        const wrapper = document.createElement("label");
+        wrapper.className = "office-field";
+
+        const title = document.createElement("span");
+        title.textContent = label;
+
+        const input = document.createElement("input");
+        input.name = name;
+        input.type = type;
+        input.required = true;
+
+        if (type === "number") {
+            input.min = name === "books_borrowed" ? "1" : "0";
+            input.step = name === "balance" ? "0.01" : "1";
+        }
+
+        wrapper.append(title, input);
+        fields.appendChild(wrapper);
+    });
+
+    // Hide dashboard content while viewing an office
+    document.querySelectorAll(
+        ".dash-main > :not(#officeSection)"
+    ).forEach(element => {
+        element.hidden = true;
+        element.style.display = "none";
+    });
+
+    document.getElementById("officeSection").hidden = false;
+
+    loadOfficeTasks();
+    window.scrollTo(0, 0);
+}
+
+// Override existing Home behavior to return to dashboard
+function goHome() {
+    currentOffice = null;
+
+    document.getElementById("officeSection").hidden = true;
+
+    document.querySelectorAll(
+        ".dash-main > :not(#officeSection)"
+    ).forEach(element => {
+        element.hidden = false;
+        element.style.removeProperty("display");
+    });
+
+    if (typeof closeProfile === "function") {
+        closeProfile();
+    }
+
+    window.scrollTo(0, 0);
+}
+
+// ADD TASK
+document.getElementById("officeTaskForm")
+    .addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        if (!currentOffice) return;
+
+        const { data: { user }, error: authError } =
+            await supabaseClient.auth.getUser();
+
+        if (authError || !user) {
+            alert("Please log in first.");
+            return;
+        }
+
+        const formData = new FormData(this);
+
+        const task = {
+            student_id: user.id,
+            office: currentOffice,
+            due_date: formData.get("due_date")
+        };
+
+        if (currentOffice === "Library") {
+            task.books_borrowed =
+                Number(formData.get("books_borrowed"));
+            task.date_borrowed =
+                formData.get("date_borrowed");
+        }
+
+        if (currentOffice === "Registrar" ||
+            currentOffice === "Guidance") {
+            task.papers = formData.get("papers").trim();
+        }
+
+        if (currentOffice === "Finance") {
+            task.balance = Number(formData.get("balance"));
+        }
+
+        const { error } = await supabaseClient
+            .from("student_office_tasks")
+            .insert(task);
+
+        if (error) {
+            alert("Error: " + error.message);
+            return;
+        }
+
+        this.reset();
+        await loadOfficeTasks();
+    });
+
+// DISPLAY TASKS
+async function loadOfficeTasks() {
+    const office = currentOffice;
+    if (!office) return;
+
+    const list = document.getElementById("officeTaskList");
+    list.textContent = "Loading tasks...";
+
+    const { data: { user }, error: authError } =
+        await supabaseClient.auth.getUser();
+
+    if (authError || !user) {
+        list.textContent = "Please log in first.";
+        return;
+    }
+
+    const { data, error } = await supabaseClient
+        .from("student_office_tasks")
+        .select("*")
+        .eq("student_id", user.id)
+        .eq("office", office)
+        .order("created_at", { ascending: false });
+
+    if (currentOffice !== office) return;
+
+    if (error) {
+        list.textContent = error.message;
+        return;
+    }
+
+    list.replaceChildren();
+
+    if (!data.length) {
+        list.textContent = "No tasks added yet.";
+        return;
+    }
+
+    data.forEach(task => {
+        const item = document.createElement("div");
+        item.className = "office-task";
+
+        function addDetail(label, value) {
+            const p = document.createElement("p");
+            p.textContent = label + ": " + value;
+            item.appendChild(p);
+        }
+
+        function formatDate(date) {
+            if (!date) return "N/A";
+            const [y, m, d] = date.split("-");
+            return `${d}/${m}/${y}`;
+        }
+
+        if (office === "Library") {
+            addDetail("Books Borrowed", task.books_borrowed);
+            addDetail("Date Borrowed",
+                formatDate(task.date_borrowed));
+            addDetail("Return Date",
+                formatDate(task.due_date));
+        }
+
+        if (office === "Registrar" ||
+            office === "Guidance") {
+            addDetail("Papers to Submit", task.papers);
+            addDetail("Deadline", formatDate(task.due_date));
+        }
+
+        if (office === "Finance") {
+            addDetail("Balance", task.balance);
+            addDetail("Due Date", formatDate(task.due_date));
+        }
+
+        addDetail("Status",
+            task.done ? "Completed" : "Pending");
+
+        const statusButton = document.createElement("button");
+        statusButton.type = "button";
+        statusButton.textContent =
+            task.done ? "Mark Pending" : "Mark Completed";
+
+        statusButton.onclick = () =>
+            updateOfficeTask(task.id, !task.done);
+
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.textContent = "Delete";
+
+        deleteButton.onclick = () =>
+            deleteOfficeTask(task.id);
+
+        item.append(statusButton, deleteButton);
+        list.appendChild(item);
+    });
+}
+
+// UPDATE STATUS
+async function updateOfficeTask(id, done) {
+    const { error } = await supabaseClient
+        .from("student_office_tasks")
+        .update({ done })
+        .eq("id", id);
+
+    if (error) {
+        alert(error.message);
+        return;
+    }
+
+    await loadOfficeTasks();
+}
+
+// DELETE TASK
+async function deleteOfficeTask(id) {
+    if (!confirm("Delete this task?")) return;
+
+    const { error } = await supabaseClient
+        .from("student_office_tasks")
+        .delete()
+        .eq("id", id);
+
+    if (error) {
+        alert(error.message);
+        return;
+    }
+
+    await loadOfficeTasks();
+}
