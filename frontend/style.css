@@ -1545,8 +1545,9 @@ body {
 }
 
 .office-navigation button {
-    background: white;
-    border: 1px solid #e5e7eb;
+    background: linear-gradient(135deg, #e94809, #7778f5);
+    border: 1px solid transparent;
+    color: white;
     border-radius: 14px;
     padding: 22px;
     cursor: pointer;
@@ -1559,12 +1560,19 @@ body {
 }
 
 .office-navigation button:hover {
-    border-color: #5b5cf0;
-    transform: translateY(-3px);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 22px rgba(233, 72, 9, 0.28);
+    filter: brightness(1.08);
+}
+
+.office-navigation button:hover strong {
+    background: rgba(255, 255, 255, 0.35);
+    transform: scale(1.08);
 }
 
 .office-navigation strong {
-    background: #5b5cf0;
+    background: rgba(255, 255, 255, 0.22);
+    transition: 0.2s;
     color: white;
     width: 48px;
     height: 48px;

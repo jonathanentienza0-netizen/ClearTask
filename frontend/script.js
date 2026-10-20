@@ -18,13 +18,13 @@ if (registerForm) {
         const fullName = document.getElementById("registerName").value.trim();
         const studentNumber = document.getElementById("registerStudentNumber").value.trim();
         const email = document.getElementById("registerEmail").value.trim();
-        const course = document.getElementById("registerCourse").value.trim();
+        const program = document.getElementById("registerProgram").value.trim();
         const yearLevel = document.getElementById("registerYearLevel").value;
         const password = document.getElementById("registerPassword").value;
         const confirmPassword = document.getElementById("registerConfirmPassword").value;
         const terms = document.getElementById("registerTerms");
 
-        if (!fullName || !studentNumber || !email || !course || !yearLevel || !password) {
+        if (!fullName || !studentNumber || !email || !program || !yearLevel || !password) {
                     showMessage("Please complete all required fields.");
                     return;
                 }
@@ -52,7 +52,7 @@ if (registerForm) {
                 data: {
                             full_name: fullName,
                             student_number: studentNumber,
-                            course: course,
+                            program: program,
                             year_level: yearLevel
                         }
             }
@@ -1069,7 +1069,7 @@ async function openProfile() {
     document.getElementById("profileName").textContent = "Loading...";
     document.getElementById("profileStudentNumber").textContent = "Loading...";
     document.getElementById("profileEmail").textContent = "Loading...";
-    document.getElementById("profileCourse").textContent = "Loading...";
+    document.getElementById("profileProgram").textContent = "Loading...";
     document.getElementById("profileYearLevel").textContent = "Loading...";
 
     // Get currently logged-in student
@@ -1085,7 +1085,7 @@ async function openProfile() {
     // Fetch student information from Supabase
     const { data: student, error } = await supabaseClient
         .from("students")
-        .select("full_name, student_number, email, course, year_level")
+        .select("full_name, student_number, email, program, year_level")
         .eq("id", user.id)
         .single();
 
@@ -1106,8 +1106,8 @@ async function openProfile() {
     document.getElementById("profileEmail").textContent =
         student.email || user.email || "Not provided";
 
-    document.getElementById("profileCourse").textContent =
-        student.course || "Not provided";
+    document.getElementById("profileProgram").textContent =
+        student.program || "Not provided";
 
     const year = student.year_level;
 
@@ -1843,11 +1843,11 @@ function editProfile() {
     button.style.display = "none";
     form.style.display = "block";
 
-    const course = document.getElementById("profileCourse").textContent;
+    const program = document.getElementById("profileProgram").textContent;
     const yearLevel = document.getElementById("profileYearLevel").textContent;
 
-    document.getElementById("editProfileCourse").value =
-        course === "Not provided" ? "" : course;
+    document.getElementById("editProfileProgram").value =
+        program === "Not provided" ? "" : program;
 
     const yearMatch = yearLevel.match(/^[1-5]/);
 
@@ -1874,12 +1874,12 @@ if (editProfileForm) {
     editProfileForm.addEventListener("submit", async function (event) {
         event.preventDefault();
 
-        const course = document.getElementById("editProfileCourse").value.trim();
+        const program = document.getElementById("editProfileProgram").value.trim();
         const yearLevel = document.getElementById("editProfileYearLevel").value;
         const saveButton = editProfileForm.querySelector('button[type="submit"]');
 
-        if (!course || !yearLevel) {
-            alert("Please complete Course and Year Level.");
+        if (!program || !yearLevel) {
+            alert("Please complete Program and Year Level.");
             return;
         }
 
@@ -1899,11 +1899,11 @@ if (editProfileForm) {
             const { data, error } = await supabaseClient
                 .from("students")
                 .update({
-                    course: course,
+                    program: program,
                     year_level: yearLevel
                 })
                 .eq("id", user.id)
-                .select("course, year_level")
+                .select("program, year_level")
                 .single();
 
             if (error) {
@@ -1911,7 +1911,7 @@ if (editProfileForm) {
             }
 
             // Refresh displayed profile information
-            document.getElementById("profileCourse").textContent = data.course;
+            document.getElementById("profileProgram").textContent = data.program;
 
             const yearLabels = {
                 "1": "1st Year",
