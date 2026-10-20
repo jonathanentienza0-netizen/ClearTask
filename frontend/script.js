@@ -28,14 +28,47 @@ if (registerForm) {
                     showMessage("Please complete all required fields.");
                     return;
                 }
+        
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            showMessage("Please enter a valid email address (e.g., student@example.com).");
+            return;
+        }
+
+        // STUDENT NUMBER VALIDATION
+        
+        if (!/^[0-9]{11}$/.test(studentNumber)) {
+            showMessage("Student Number must contain exactly 11 digits (numbers only).");
+            return;
+        }
+
 
         if (password !== confirmPassword) {
             showMessage("Passwords do not match.");
             return;
         }
+        // PASSWORD REQUIREMENTS
+        if (password.length < 8) {
+            showMessage("Password must be at least 8 characters.");
+            return;
+        }
 
-        if (password.length < 6) {
-            showMessage("Password must be at least 6 characters.");
+        if (!/[A-Z]/.test(password)) {
+            showMessage("Password must contain at least one uppercase letter.");
+            return;
+        }
+
+        if (!/[a-z]/.test(password)) {
+            showMessage("Password must contain at least one lowercase letter.");
+            return;
+        }
+
+        if (!/[0-9]/.test(password)) {
+            showMessage("Password must contain at least one number.");
+            return;
+        }
+
+        if (!/[^A-Za-z0-9]/.test(password)) {
+            showMessage("Password must contain at least one special character.");
             return;
         }
 
@@ -1938,4 +1971,152 @@ if (editProfileForm) {
             saveButton.textContent = "Save Changes";
         }
     });
+}
+
+
+// LIVE PASSWORD STRENGTH INDICATOR
+const registerPasswordInput = document.getElementById("registerPassword");
+const passwordStrengthFill = document.getElementById("passwordStrengthFill");
+const passwordStrengthText = document.getElementById("passwordStrengthText");
+
+if (registerPasswordInput && passwordStrengthFill && passwordStrengthText) {
+    registerPasswordInput.addEventListener("input", function () {
+        const password = this.value;
+
+        const requirements = [
+            password.length >= 8,
+            /[A-Z]/.test(password),
+            /[a-z]/.test(password),
+            /[0-9]/.test(password),
+            /[^A-Za-z0-9]/.test(password)
+        ];
+
+        const score = requirements.filter(Boolean).length;
+
+        if (password.length === 0) {
+            passwordStrengthFill.style.width = "0%";
+            passwordStrengthText.textContent = "Password strength";
+            passwordStrengthText.style.color = "#6b7280";
+            return;
+        }
+
+        passwordStrengthFill.style.width = (score / 5 * 100) + "%";
+
+        if (score === 5) {
+            // GREEN - ALL REQUIREMENTS MET
+            passwordStrengthFill.style.backgroundColor = "#22c55e";
+            passwordStrengthText.textContent = "Strong Password";
+            passwordStrengthText.style.color = "#22c55e";
+
+        } else if (score >= 3) {
+            // ORANGE - SOME REQUIREMENTS MET
+            passwordStrengthFill.style.backgroundColor = "#f59e0b";
+            passwordStrengthText.textContent = "Medium Password";
+            passwordStrengthText.style.color = "#f59e0b";
+
+        } else {
+            // RED - FEW REQUIREMENTS MET
+            passwordStrengthFill.style.backgroundColor = "#ef4444";
+            passwordStrengthText.textContent = "Weak Password";
+            passwordStrengthText.style.color = "#ef4444";
+        }
+    });
+}
+
+
+/* LIVE STUDENT NUMBER VALIDATION */
+const studentNumberInput = document.getElementById("registerStudentNumber");
+const studentNumberHint = document.getElementById("studentNumberHint");
+const studentNumberCount = document.getElementById("studentNumberCount");
+
+if (studentNumberInput && studentNumberHint && studentNumberCount) {
+    studentNumberInput.addEventListener("input", function () {
+
+        // Numbers only, maximum of 11 digits
+        this.value = this.value.replace(/\D/g, "").slice(0, 11);
+
+        const length = this.value.length;
+        const isValid = /^[0-9]{11}$/.test(this.value);
+
+        // Update digit counter
+        studentNumberCount.textContent = `${length}/11`;
+
+        // Turn green when valid
+        studentNumberHint.classList.toggle("valid", isValid);
+        studentNumberCount.classList.toggle("valid", isValid);
+
+        // Update icon
+        const icon = studentNumberHint.querySelector("i");
+
+        if (icon) {
+            icon.className = isValid
+                ? "fa-solid fa-circle-check"
+                : "fa-regular fa-circle";
+        }
+    });
+}
+
+// LIVE EMAIL VALIDATION
+const registerEmailInput = document.getElementById("registerEmail");
+const emailHint = document.getElementById("emailHint");
+
+if (registerEmailInput && emailHint) {
+    registerEmailInput.addEventListener("input", function () {
+        const email = this.value.trim();
+
+        const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+        emailHint.classList.toggle("valid", isValid);
+
+        const icon = emailHint.querySelector("i");
+
+        if (icon) {
+            icon.className = isValid
+                ? "fa-solid fa-circle-check"
+                : "fa-regular fa-circle";
+        }
+
+        emailHint.lastChild.textContent = isValid
+            ? " Valid email format!"
+            : " Enter a valid email address";
+    });
+}
+
+
+// TERMS OF SERVICE MODAL
+function openTermsModal(event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
+    document.getElementById("termsModal").style.display = "flex";
+}
+
+function closeTermsModal() {
+    document.getElementById("termsModal").style.display = "none";
+}
+
+
+function openPrivacyModal(event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
+    const modal = document.getElementById("privacyModal");
+
+    if (modal) {
+        modal.style.display = "flex";
+    } else {
+        console.error("Privacy Policy modal not found.");
+    }
+}
+
+function closePrivacyModal() {
+    const modal = document.getElementById("privacyModal");
+
+    if (modal) {
+        modal.style.display = "none";
+    }
 }

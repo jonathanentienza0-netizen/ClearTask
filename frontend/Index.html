@@ -115,6 +115,7 @@
                                 >
 
                             </div>
+                            
 
                             <small class="error-message"
                                    id="loginIdentifierError"></small>
@@ -284,14 +285,33 @@
 
                                 <i class="fa-solid fa-id-card"></i>
 
-                                <input
-                                    type="text"
-                                    id="registerStudentNumber"
-                                    placeholder="Enter your student number"
-                                    autocomplete="student-number"
-                                >
+                                
+                                    <input
+                                        type="text"
+                                        id="registerStudentNumber"
+                                        placeholder="Enter Student Number"
+                                        inputmode="numeric"
+                                        minlength="11"
+                                        maxlength="11"
+                                        pattern="[0-9]{11}"
+                                        
+                                        title="Student Number must contain numbers only."
+                                        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                                        required
+                                    >
+
 
                             </div>
+                            
+                            <!-- Student Number Requirements -->
+                            <div class="student-number-requirement">
+                                <small id="studentNumberHint">
+                                    <i class="fa-regular fa-circle"></i>
+                                    Exactly 11 digits (numbers only)
+                                </small>
+                                <small id="studentNumberCount">0/11</small>
+                            </div>
+
 
                             <small class="error-message"
                                    id="registerStudentNumberError"></small>
@@ -316,8 +336,18 @@
                                     placeholder="Enter your email"
                                     autocomplete="email"
                                 >
+                                
 
                             </div>
+                            
+                            <!-- Email Validation Indicator -->
+                            <div class="email-requirement">
+                                <small id="emailHint">
+                                    <i class="fa-regular fa-circle"></i>
+                                    Enter a valid email address
+                                </small>
+                            </div>
+
 
                             <small class="error-message"
                                    id="registerEmailError"></small>
@@ -372,6 +402,7 @@
 
 
 
+                       
                         <!-- Password -->
                         <div class="input-group">
 
@@ -399,9 +430,18 @@
                                     <i class="fa-regular fa-eye"></i>
                                 </button>
 
+                            </div> <!-- END OF INPUT-BOX -->
+
+                            <!-- Password Strength Indicator -->
+                            <div class="password-strength">
+                                <div class="strength-bar">
+                                    <div id="passwordStrengthFill"></div>
+                                </div>
+                                <small id="passwordStrengthText">Password strength</small>
                             </div>
 
-                        </div>
+                        </div> <!-- END OF INPUT-GROUP -->
+
 
 
                         <!-- Requirements -->
@@ -470,6 +510,9 @@
                         </div>
 
 
+                       
+                        
+                        
                         <!-- Terms -->
                         <div class="terms-group">
 
@@ -482,17 +525,31 @@
 
                                 <span>
                                     I agree to the
-                                    <strong>Terms of Service</strong>
+                                    <a href="#"
+                                    class="terms-link"
+                                    onclick="openTermsModal(event)">
+                                        Terms of Service
+                                    </a>
                                     and
-                                    <strong>Privacy Policy</strong>
+                                    <a href="#"
+                                    class="terms-link"
+                                    onclick="openPrivacyModal(event)">
+                                        Privacy Policy
+                                    </a>
                                 </span>
 
                             </label>
 
                             <small class="error-message"
-                                   id="registerTermsError"></small>
+                                id="registerTermsError"></small>
 
                         </div>
+
+                        <div id="registerMessage"
+                            class="message">
+                        </div>
+
+
 
 
                         <div id="registerMessage"
@@ -1118,5 +1175,154 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="script.js"></script>
 
+<!-- PRIVACY POLICY MODAL -->
+<div id="privacyModal" class="legal-modal">
+
+    <div class="legal-modal-content">
+
+        <button
+            type="button"
+            class="legal-close"
+            onclick="closePrivacyModal()">
+            &times;
+        </button>
+
+        <h2>ClearTask Privacy Policy</h2>
+
+        <div class="legal-modal-body">
+
+            <h3>1. Information Collection</h3>
+            <p>
+                ClearTask collects student information
+                such as full name, student number,
+                email, program, and year level.
+            </p>
+
+            <h3>2. Purpose</h3>
+            <p>
+                Information is used for student
+                account management and clearance monitoring.
+            </p>
+
+            <h3>3. Data Security</h3>
+            <p>
+                ClearTask uses Supabase for authentication
+                and data storage, with access controls
+                intended to protect student information.
+            </p>
+
+            <h3>4. Uploaded Documents</h3>
+            <p>
+                Submitted documents are intended for
+                clearance-related purposes only.
+            </p>
+
+            <h3>5. Privacy Requests</h3>
+            <p>
+                Students may contact the designated
+                system administrator regarding their
+                personal information.
+            </p>
+
+        </div>
+
+        <button
+            type="button"
+            class="legal-done-btn"
+            onclick="closePrivacyModal()">
+            Close
+        </button>
+
+    </div>
+</div>
+
 </body>
+
+<!-- TERMS OF SERVICE MODAL -->
+<div id="termsModal" class="legal-modal">
+    <div class="legal-modal-content">
+
+        <button
+            type="button"
+            class="legal-close"
+            onclick="closeTermsModal()"
+            aria-label="Close Terms of Service"
+        >
+            &times;
+        </button>
+
+        <h2>ClearTask Terms of Service</h2>
+
+        <div class="legal-modal-body">
+            <p>
+                Welcome to ClearTask: Student Clearance
+                Monitoring System. By using this website,
+                you agree to the following terms:
+            </p>
+
+            <h3>1. Account Registration</h3>
+            <p>
+                Students must provide accurate and truthful
+                information when creating an account.
+                Each account is intended for individual use.
+            </p>
+
+            <h3>2. Account Security</h3>
+            <p>
+                Students are responsible for keeping their
+                login credentials confidential and for
+                reporting suspected unauthorized access.
+            </p>
+
+            <h3>3. Clearance Monitoring</h3>
+            <p>
+                ClearTask allows students to monitor their
+                clearance requirements, view their progress,
+                and submit supporting documents when required.
+            </p>
+
+            <h3>4. Submission of Documents</h3>
+            <p>
+                Students must submit accurate and relevant
+                documents. Uploading misleading, fraudulent,
+                or unrelated files is prohibited.
+            </p>
+
+            <h3>5. Acceptable Use</h3>
+            <p>
+                Users must not attempt to access another
+                student's account, manipulate clearance
+                records, or interfere with the system.
+            </p>
+
+            <h3>6. System Availability</h3>
+            <p>
+                ClearTask may experience maintenance,
+                technical issues, or temporary interruptions.
+            </p>
+
+            <h3>7. Changes to These Terms</h3>
+            <p>
+                These terms may be updated as the system
+                develops. Significant changes should be
+                communicated to users.
+            </p>
+
+            <p>
+                By registering, you acknowledge that you
+                have read and understood these terms.
+            </p>
+        </div>
+
+        <button
+            type="button"
+            class="legal-done-btn"
+            onclick="closeTermsModal()"
+        >
+            Close
+        </button>
+
+    </div>
+</div>
+
 </html>
