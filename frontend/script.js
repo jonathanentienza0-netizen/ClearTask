@@ -18,14 +18,16 @@ if (registerForm) {
         const fullName = document.getElementById("registerName").value.trim();
         const studentNumber = document.getElementById("registerStudentNumber").value.trim();
         const email = document.getElementById("registerEmail").value.trim();
+        const course = document.getElementById("registerCourse").value.trim();
+        const yearLevel = document.getElementById("registerYearLevel").value;
         const password = document.getElementById("registerPassword").value;
         const confirmPassword = document.getElementById("registerConfirmPassword").value;
         const terms = document.getElementById("registerTerms");
 
-        if (!fullName || !studentNumber || !email || !password) {
-            showMessage("Please complete all required fields.");
-            return;
-        }
+        if (!fullName || !studentNumber || !email || !course || !yearLevel || !password) {
+                    showMessage("Please complete all required fields.");
+                    return;
+                }
 
         if (password !== confirmPassword) {
             showMessage("Passwords do not match.");
@@ -48,9 +50,11 @@ if (registerForm) {
             options: {
                 emailRedirectTo: window.location.origin + window.location.pathname,
                 data: {
-                    full_name: fullName,
-                    student_number: studentNumber
-                }
+                            full_name: fullName,
+                            student_number: studentNumber,
+                            course: course,
+                            year_level: yearLevel
+                        }
             }
         });
 
@@ -64,9 +68,6 @@ if (registerForm) {
         alert("Account created successfully!");
 registerForm.reset();
 showPage("loginPage");
-
-        registerForm.reset();
-        showPage("loginPage");
     });
 }
 
@@ -308,13 +309,29 @@ filteredTasks.forEach(task => {
         const title = document.createElement("strong");
         title.textContent = task.task_name;
 
-        const details = document.createElement("p");
-        details.textContent =
-            `Office: ${officeName} | Status: ${task.status}`;
+        
+            const details = document.createElement("p");
 
-        item.appendChild(title);
-        item.appendChild(details);
-        // Add proof upload control for pending requirements
+            details.appendChild(
+                document.createTextNode(`Office: ${officeName} | Status: `)
+            );
+
+            const statusText = document.createElement("span");
+            statusText.textContent = task.status;
+            statusText.style.fontWeight = "600";
+
+            if (task.status === "Cleared") {
+                statusText.style.color = "#16a34a";
+            } else if (task.status === "Pending") {
+                statusText.style.color = "#ea580c";
+            }
+
+            details.appendChild(statusText);
+
+            item.appendChild(title);
+            item.appendChild(details);
+
+        
                 if (task.status === "Pending") {
                     const uploadInput = document.createElement("input");
                     uploadInput.type = "file";
@@ -1041,12 +1058,65 @@ function goHome() {
 }
 
 /* Profile modal (button beside Logout, top right) */
-function openProfile() {
-    document.getElementById("profileName").textContent =
-        document.getElementById("dashboardUser").textContent;
 
-    document.getElementById("profileModal").classList.add("open");
+async function openProfile() {
+    const modal = document.getElementById("profileModal");
+
+    // Open profile modal
+    modal.classList.add("open");
+
+    // Show loading state
+    document.getElementById("profileName").textContent = "Loading...";
+    document.getElementById("profileStudentNumber").textContent = "Loading...";
+    document.getElementById("profileEmail").textContent = "Loading...";
+    document.getElementById("profileCourse").textContent = "Loading...";
+    document.getElementById("profileYearLevel").textContent = "Loading...";
+
+    // Get currently logged-in student
+    const { data: { user }, error: authError } =
+        await supabaseClient.auth.getUser();
+
+    if (authError || !user) {
+        alert("Please log in again.");
+        modal.classList.remove("open");
+        return;
+    }
+
+    // Fetch student information from Supabase
+    const { data: student, error } = await supabaseClient
+        .from("students")
+        .select("full_name, student_number, email, course, year_level")
+        .eq("id", user.id)
+        .single();
+
+    if (error) {
+        console.error("Profile loading error:", error);
+        alert("Unable to load student profile.");
+        modal.classList.remove("open");
+        return;
+    }
+
+    // Display student information
+    document.getElementById("profileName").textContent =
+        student.full_name || "Student";
+
+    document.getElementById("profileStudentNumber").textContent =
+        student.student_number || "Not provided";
+
+    document.getElementById("profileEmail").textContent =
+        student.email || user.email || "Not provided";
+
+    document.getElementById("profileCourse").textContent =
+        student.course || "Not provided";
+
+    const year = student.year_level;
+
+    document.getElementById("profileYearLevel").textContent =
+        year
+            ? `${year}${year === "1" ? "st" : year === "2" ? "nd" : year === "3" ? "rd" : "th"} Year`
+            : "Not provided";
 }
+
 
 function closeProfile() {
     const modal = document.getElementById("profileModal");
@@ -1464,8 +1534,13 @@ function goHome() {
 }
 
 // ADD TASK
-document.getElementById("officeTaskForm")
-    .addEventListener("submit", async function(event) {
+
+// ADD TASK
+const officeTaskForm = document.getElementById("officeTaskForm");
+
+if (officeTaskForm) {
+    officeTaskForm.addEventListener("submit", async function(event) {
+
         event.preventDefault();
 
         if (!currentOffice) return;
@@ -1514,6 +1589,7 @@ document.getElementById("officeTaskForm")
         this.reset();
         await loadOfficeTasks();
     });
+}
 // DISPLAY CLEARANCE REQUIREMENTS PER OFFICE
 async function loadOfficeTasks() {
     const office = currentOffice;
@@ -1600,11 +1676,126 @@ async function loadOfficeTasks() {
         const title = document.createElement("strong");
         title.textContent = task.task_name;
 
+        
         const status = document.createElement("p");
         status.textContent = "Status: " + task.status;
+        status.style.fontWeight = "600";
 
+        if (task.status === "Cleared") {
+            status.style.color = "#16a34a";
+        } else if (task.status === "Pending") {
+            status.style.color = "#ea580c";
+        }
+
+
+      
         item.append(title, status);
+
+        
+if (task.status === "Pending") {
+    const uploadBtn = document.createElement("button");
+    uploadBtn.type = "button";
+    uploadBtn.textContent = "Upload Proof";
+    uploadBtn.className = "upload-proof-btn";
+
+    const uploadInput = document.createElement("input");
+    uploadInput.type = "file";
+    uploadInput.accept = ".pdf,.jpg,.jpeg,.png";
+    uploadInput.style.display = "none";
+
+    uploadBtn.addEventListener("click", () => {
+        uploadInput.click();
+    });
+
+    uploadInput.addEventListener("change", async () => {
+        const file = uploadInput.files[0];
+        if (!file) return;
+
+        const allowedTypes = [
+            "application/pdf",
+            "image/jpeg",
+            "image/png"
+        ];
+
+        if (!allowedTypes.includes(file.type)) {
+            alert("PDF, JPG, or PNG files only.");
+            uploadInput.value = "";
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            alert("Maximum file size is 5 MB.");
+            uploadInput.value = "";
+            return;
+        }
+
+        uploadBtn.disabled = true;
+        uploadBtn.textContent = "Uploading...";
+
+        try {
+            const { data: { user }, error: authError } =
+                await supabaseClient.auth.getUser();
+
+            if (authError || !user) {
+                throw new Error("Please log in again.");
+            }
+
+            const extension = file.name
+                .split(".")
+                .pop()
+                .toLowerCase();
+
+            const filePath =
+                `${user.id}/${task.id}/proof-${crypto.randomUUID()}.${extension}`;
+
+            const { error: uploadError } =
+                await supabaseClient.storage
+                    .from("clearance-proofs")
+                    .upload(filePath, file, {
+                        contentType: file.type,
+                        upsert: false
+                    });
+
+            if (uploadError) throw uploadError;
+
+            const { error: completionError } =
+                await supabaseClient.rpc(
+                    "complete_my_clearance_task",
+                    {
+                        p_task_id: task.id,
+                        p_file_path: filePath
+                    }
+                );
+
+            if (completionError) {
+                throw new Error(
+                    "Proof uploaded, but clearance status was not updated: " +
+                    completionError.message
+                );
+            }
+
+            alert("Proof submitted! Requirement marked as Cleared.");
+
+            await loadOfficeTasks();
+            await loadClearanceTasks();
+
+        } catch (error) {
+            console.error("Office proof upload error:", error);
+            alert("Upload failed: " + error.message);
+        } finally {
+            uploadBtn.disabled = false;
+            uploadBtn.textContent = "Upload Proof";
+            uploadInput.value = "";
+        }
+    });
+
+    item.appendChild(uploadBtn);
+    item.appendChild(uploadInput);
+}
+
+
         list.appendChild(item);
+
     });
 }
 
@@ -1638,4 +1829,113 @@ async function deleteOfficeTask(id) {
     }
 
     await loadOfficeTasks();
+}
+
+function editProfile() {
+    const form = document.getElementById("editProfileForm");
+    const button = document.getElementById("editProfileBtn");
+
+    if (!form || !button) {
+        console.error("Edit Profile elements not found!");
+        return;
+    }
+
+    button.style.display = "none";
+    form.style.display = "block";
+
+    const course = document.getElementById("profileCourse").textContent;
+    const yearLevel = document.getElementById("profileYearLevel").textContent;
+
+    document.getElementById("editProfileCourse").value =
+        course === "Not provided" ? "" : course;
+
+    const yearMatch = yearLevel.match(/^[1-5]/);
+
+    document.getElementById("editProfileYearLevel").value =
+        yearMatch ? yearMatch[0] : "";
+}
+
+function cancelEditProfile() {
+    const form = document.getElementById("editProfileForm");
+    const button = document.getElementById("editProfileBtn");
+
+    if (!form || !button) {
+        console.error("Edit Profile form or button not found.");
+        return;
+    }
+
+    form.style.display = "none";
+    button.style.display = "block";
+}
+
+const editProfileForm = document.getElementById("editProfileForm");
+
+if (editProfileForm) {
+    editProfileForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const course = document.getElementById("editProfileCourse").value.trim();
+        const yearLevel = document.getElementById("editProfileYearLevel").value;
+        const saveButton = editProfileForm.querySelector('button[type="submit"]');
+
+        if (!course || !yearLevel) {
+            alert("Please complete Course and Year Level.");
+            return;
+        }
+
+        saveButton.disabled = true;
+        saveButton.textContent = "Saving...";
+
+        try {
+            // Get currently logged-in student
+            const { data: { user }, error: authError } =
+                await supabaseClient.auth.getUser();
+
+            if (authError || !user) {
+                throw new Error("Please log in again.");
+            }
+
+            // Update student information in Supabase
+            const { data, error } = await supabaseClient
+                .from("students")
+                .update({
+                    course: course,
+                    year_level: yearLevel
+                })
+                .eq("id", user.id)
+                .select("course, year_level")
+                .single();
+
+            if (error) {
+                throw error;
+            }
+
+            // Refresh displayed profile information
+            document.getElementById("profileCourse").textContent = data.course;
+
+            const yearLabels = {
+                "1": "1st Year",
+                "2": "2nd Year",
+                "3": "3rd Year",
+                "4": "4th Year",
+                "5": "5th Year"
+            };
+
+            document.getElementById("profileYearLevel").textContent =
+                yearLabels[data.year_level] || "Not provided";
+
+            // Return to profile view
+            cancelEditProfile();
+
+            alert("Profile updated successfully!");
+
+        } catch (error) {
+            console.error("Profile update error:", error);
+            alert("Unable to update profile: " + error.message);
+
+        } finally {
+            saveButton.disabled = false;
+            saveButton.textContent = "Save Changes";
+        }
+    });
 }

@@ -1465,7 +1465,7 @@ body {
     position: relative;
 
     width: 100%;
-    max-width: 340px;
+    max-width: 420px;
 
     padding: 32px 24px;
 
@@ -1627,21 +1627,54 @@ body {
 }
 
 .office-task {
-    padding: 15px;
+    padding: 18px 20px;
     border: 1px solid #e5e7eb;
     border-radius: 10px;
     margin-bottom: 12px;
+    background-color: #ffffff;
+    transition: box-shadow 0.2s ease;
+}
+
+.office-task:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.office-task strong {
+    display: block;
+    font-size: 14px;
+    color: #1f2937;
+    margin-bottom: 6px;
 }
 
 .office-task p {
-    margin: 6px 0;
+    margin: 6px 0 10px;
+    font-size: 13px;
+    color: #6b7280;
 }
 
 .office-task button {
-    margin: 8px 8px 0 0;
-    padding: 8px 12px;
+    display: inline-block;
+    margin: 8px 0 0;
+    padding: 10px 16px;
+    background-color: #5b5cf6;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 600;
     cursor: pointer;
+    transition: background-color 0.2s ease;
 }
+
+.office-task button:hover {
+    background-color: #4748d8;
+}
+
+.office-task button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 
 @media (max-width: 600px) {
     .office-navigation {
@@ -1675,4 +1708,207 @@ body {
     .clearance-status {
         padding: 6px 10px;
     }
+}
+
+
+#taskList .upload-proof-btn {
+    background-color: #5b5cf6;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background-color 0.2s ease;
+}
+
+#taskList .upload-proof-btn:hover {
+    background-color: #4748d8;
+}
+
+#taskList .upload-proof-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ClearTask Dashboard Requirement Layout */
+#taskList .task-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    flex-wrap: wrap;
+}
+
+#taskList .task-item strong {
+    overflow-wrap: anywhere;
+    line-height: 1.5;
+}
+
+#taskList .upload-proof-btn {
+    margin-left: auto;
+    min-height: 34px;
+    white-space: nowrap;
+}
+
+/* Small screen support */
+@media (max-width: 600px) {
+    #taskList .task-item {
+        align-items: flex-start;
+    }
+
+    #taskList .upload-proof-btn {
+        margin-left: 0;
+    }
+}
+
+
+/* Registration Year Level Dropdown */
+#registerYearLevel {
+    width: 100%;
+    height: 100%;
+    min-height: 40px;
+    padding: 10px 12px 10px 40px;
+
+    border: none;
+    outline: none;
+    background: transparent;
+
+    color: #374151;
+    font-size: 13px;
+    font-family: inherit;
+
+    cursor: pointer;
+    appearance: none;
+}
+
+/* Custom dropdown arrow */
+#registerYearLevel {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%236b7280' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 16px;
+    padding-right: 40px;
+}
+
+#registerYearLevel:focus {
+    outline: none;
+}
+
+/* Student Profile Information */
+
+.profile-details {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    text-align: left;
+}
+
+.profile-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    padding: 12px 14px;
+
+    background: #f8f9fc;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+}
+
+.profile-detail strong {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+.profile-detail span {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1f2937;
+    overflow-wrap: anywhere;
+}
+
+/* Responsive Profile Modal */
+
+@media (max-width: 480px) {
+    .profile-card {
+        width: 90%;
+        max-width: 420px;
+        padding: 24px 18px;
+    }
+
+    .profile-details {
+        gap: 10px;
+    }
+
+    .profile-detail {
+        padding: 10px 12px;
+    }
+}
+
+
+/* Edit Profile Form */
+
+#editProfileForm .profile-detail input,
+#editProfileForm .profile-detail select {
+    display: block;
+    width: 100%;
+    min-height: 40px;
+    padding: 10px 12px;
+
+    background: #ffffff;
+    color: #1f2937;
+
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+
+    font-size: 14px;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+#editProfileForm .profile-detail label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+#editProfileForm .profile-detail input:focus,
+#editProfileForm .profile-detail select:focus {
+    outline: none;
+    border-color: #5b5cf6;
+}
+
+
+/* Office Back Button */
+
+.office-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 10px 16px;
+    margin-bottom: 20px;
+
+    background: var(--primary);
+    color: white;
+
+    border: none;
+    border-radius: 8px;
+
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+
+    transition: background 0.2s ease;
+}
+
+.office-back-btn:hover {
+    background: #4845d9;
 }

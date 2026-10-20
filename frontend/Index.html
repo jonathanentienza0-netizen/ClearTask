@@ -282,7 +282,7 @@
 
                             <div class="input-box">
 
-                                <i class="fa-solid fa-at"></i>
+                                <i class="fa-solid fa-id-card"></i>
 
                                 <input
                                     type="text"
@@ -323,6 +323,53 @@
                                    id="registerEmailError"></small>
 
                         </div>
+                        
+                        <!-- Course -->
+                        <div class="input-group">
+                            <label for="registerCourse">
+                                Course
+                            </label>
+
+                            <div class="input-box">
+                                <i class="fa-solid fa-graduation-cap"></i>
+
+                                <input
+                                    type="text"
+                                    id="registerCourse"
+                                    placeholder="e.g. BS Computer Engineering"
+                                    autocomplete="off"
+                                    required
+                                >
+                            </div>
+
+                            <small class="error-message"
+                                id="registerCourseError"></small>
+                        </div>
+
+
+                        <!-- Year Level -->
+                        <div class="input-group">
+                            <label for="registerYearLevel">
+                                Year Level
+                            </label>
+
+                            <div class="input-box">
+                                <i class="fa-solid fa-calendar"></i>
+
+                                <select id="registerYearLevel" required>
+                                    <option value="">Select Year Level</option>
+                                    <option value="1">1st Year</option>
+                                    <option value="2">2nd Year</option>
+                                    <option value="3">3rd Year</option>
+                                    <option value="4">4th Year</option>
+                                    <option value="5">5th Year</option>
+                                </select>
+                            </div>
+
+                            <small class="error-message"
+                                id="registerYearLevelError"></small>
+                        </div>
+
 
 
                         <!-- Password -->
@@ -807,8 +854,98 @@
                 <i class="fa-solid fa-user"></i>
             </div>
 
-            <h3 id="profileName">Demo User</h3>
-            <p>Logged in to ClearTask</p>
+            
+                <h3 id="profileName">Student Name</h3>
+                <p>Student Profile</p>
+
+                <div class="profile-details">
+                    <div class="profile-detail">
+                        <strong>Student Number</strong>
+                        <span id="profileStudentNumber">Loading...</span>
+                    </div>
+
+                    <div class="profile-detail">
+                        <strong>Email Address</strong>
+                        <span id="profileEmail">Loading...</span>
+                    </div>
+
+                    <div class="profile-detail">
+                        <strong>Course</strong>
+                        <span id="profileCourse">Loading...</span>
+                    </div>
+
+                    <div class="profile-detail">
+                        <strong>Year Level</strong>
+                        <span id="profileYearLevel">Loading...</span>
+                    </div>
+                    
+                    <!-- Edit Student Profile -->
+                    
+<!-- Edit Student Profile Button -->
+<button
+    type="button"
+    id="editProfileBtn"
+    class="primary-button"
+    onclick="editProfile()"
+    style="margin-top: 20px; width: 100%;"
+>
+    <i class="fa-solid fa-pen-to-square"></i>
+    Edit Profile
+</button>
+
+<!-- Edit Profile Form -->
+<form id="editProfileForm" style="display: none; margin-top: 20px;">
+
+    <div class="profile-details">
+
+        <div class="profile-detail">
+            <label for="editProfileCourse">Course</label>
+            <input
+                type="text"
+                id="editProfileCourse"
+                placeholder="e.g. BS Computer Engineering"
+                required
+            >
+        </div>
+
+        <div class="profile-detail">
+            <label for="editProfileYearLevel">Year Level</label>
+            <select id="editProfileYearLevel" required>
+                <option value="">Select Year Level</option>
+                <option value="1">1st Year</option>
+                <option value="2">2nd Year</option>
+                <option value="3">3rd Year</option>
+                <option value="4">4th Year</option>
+                <option value="5">5th Year</option>
+            </select>
+        </div>
+
+    </div>
+
+    <button
+        type="submit"
+        class="primary-button"
+        style="width: 100%; margin-top: 16px;"
+    >
+        Save Changes
+    </button>
+
+    <button
+        type="button"
+        onclick="cancelEditProfile()"
+        style="width: 100%; margin-top: 10px;"
+    >
+        Cancel
+    </button>
+
+</form>
+
+                    
+                    
+
+
+                </div>
+
         </div>
     </div>
 
@@ -836,6 +973,16 @@
 
 <!-- OFFICE SECTION -->
 <section id="officeSection" class="office-section" hidden>
+    
+<button
+    type="button"
+    class="office-back-btn"
+    onclick="goHome()"
+>
+    <i class="fa-solid fa-arrow-left"></i>
+    Back to Dashboard
+</button>
+
     <h2 id="officeTitle"></h2>
     <p>Add and manage your clearance requirements.</p>
 
